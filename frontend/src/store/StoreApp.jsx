@@ -339,7 +339,7 @@ function StoreApp() {
  <div className="fixed top-16 left-0 right-0 z-50 max-w-xl mx-auto px-4 animate-fade-in">
  <div className="bg-primary text-primary-text py-2.5 px-4 rounded-xl text-xs font-bold text-center shadow-lg flex items-center justify-center gap-2 border border-border">
  <span className="w-2 h-2 bg-amber-500 rounded-full animate-ping"></span>
- Spambeveiliging actief: Wacht nog {cooldownRemaining}s...
+ Even geduld a.u.b. — wacht nog {cooldownRemaining}s...
  </div>
  </div>
  )}
