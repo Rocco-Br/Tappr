@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import StoreLogin from './StoreLogin';
+import HeaderControls from '../components/HeaderControls';
+import Modal from '../components/Modal';
 
 function StoreApp() {
  const [token, setToken] = useState(localStorage.getItem('storeToken'));
@@ -8,21 +10,9 @@ function StoreApp() {
  const [isValidUser, setIsValidUser] = useState(false);
  const [username, setUsername] = useState('');
  const [is18Plus, setIs18Plus] = useState(false);
- const [isDark, setIsDark] = useState(document.documentElement.classList.contains('dark'));
  const [ageVerificationStatus, setAgeVerificationStatus] = useState(null); // null, 'PENDING', 'APPROVED', 'REJECTED'
  const [showAgeVerificationModal, setShowAgeVerificationModal] = useState(false);
 
- const toggleDarkMode = () => {
- const nextIsDark = !isDark;
- setIsDark(nextIsDark);
- if (nextIsDark) {
- document.documentElement.classList.add('dark');
- localStorage.setItem('theme', 'dark');
- } else {
- document.documentElement.classList.remove('dark');
- localStorage.setItem('theme', 'light');
- }
- };
  const [activeEvent, setActiveEvent] = useState(null);
  const [products, setProducts] = useState([]);
  const [orders, setOrders] = useState([]);
@@ -290,24 +280,7 @@ function StoreApp() {
  Ingelogd als: {username}
  </span>
  </div>
- <div className="flex items-center gap-2">
- {/* Theme Toggle Button */}
- <button
- onClick={toggleDarkMode}
- className="w-8 h-8 rounded-xl flex items-center justify-center bg-surface hover:bg-surface-hover transition-colors text-muted"
- title={isDark ?"Lichte modus" :"Donkere modus"}
- >
- {isDark ? (
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="currentColor" className="w-4 h-4">
- <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m0 13.5V21M5.197 5.197l1.591 1.591M17.213 17.213l1.591 1.591M3 12h2.25m13.5 0H21M5.197 18.803l1.591-1.591M17.213 6.787l1.591-1.591M12 7.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Z" />
- </svg>
- ) : (
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="currentColor" className="w-4 h-4">
- <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
- </svg>
- )}
- </button>
- {/* Restart Tutorial Icon */}
+ <HeaderControls onLogout={handleLogout}>
  <button onClick={() => { setShowTutorial(true); setTutorialStep(1); }} className="w-8 h-8 rounded-xl flex items-center justify-center bg-surface hover:bg-surface-hover transition-colors text-muted"
  title="Bekijk Uitleg"
  >
@@ -315,12 +288,7 @@ function StoreApp() {
  <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
  </svg>
  </button>
- <button onClick={handleLogout}
- className="text-xs font-medium bg-surface hover:bg-surface-hover px-3 py-2 rounded-xl text-secondary transition-colors"
- >
- Uitloggen
- </button>
- </div>
+ </HeaderControls>
  </header>
 
  {/* Live Mededelingen (Live Announcement Banner) */}
@@ -473,13 +441,12 @@ function StoreApp() {
  </div>
  </>
  )}
-
  </main>
 
- {/* Persistent Order History Overlay / Drawer at Bottom */}
- {isValidUser && (
- <div className="fixed bottom-0 left-0 right-0 bg-surface/95 border-t border-border z-30 shadow-2xl backdrop-blur-md max-w-xl mx-auto px-4 py-3.5 transition-colors">
- <div className="flex items-center justify-between mb-3">
+  {/* Persistent Order History Overlay / Drawer at Bottom */}
+  {isValidUser && (
+  <div className="fixed bottom-0 left-0 right-0 bg-surface/95 border-t border-border z-30 shadow-2xl backdrop-blur-md max-w-xl mx-auto px-4 py-3.5 transition-colors">
+    <div className="flex items-center justify-between mb-3">
  <h3 className="text-sm font-bold tracking-tight flex items-center gap-1.5">
  <span className="inline-block w-2 h-2 bg-primary rounded-full"></span>
  Jouw Bestellingen
@@ -548,18 +515,14 @@ function StoreApp() {
  )}
 
  {/* Snel Bestellen Modal */}
- {selectedProduct && (
- <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity duration-200">
- <div className="bg-surface border border-border w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-fade-in relative max-h-[90vh] overflow-y-auto">
- {/* Close Button */}
- <button onClick={() => setSelectedProduct(null)}
- className="absolute right-4 top-4 z-10 w-7 h-7 bg-black/10 hover:bg-black/20 rounded-full flex items-center justify-center text-zinc-700 transition-colors"
- >
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="currentColor" className="w-4 h-4">
- <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
- </svg>
- </button>
-
+  <Modal
+    isOpen={!!selectedProduct}
+    onClose={() => setSelectedProduct(null)}
+    showCloseButton={true}
+    className="p-6 max-h-[90vh] overflow-y-auto"
+  >
+    {selectedProduct && (
+      <>
           {/* Product Image inside Modal Header */}
           {selectedProduct.image_url && (
             <div className="-mt-6 -mx-6 mb-4 h-48 bg-white/50 rounded-t-3xl border-b border-border overflow-hidden flex justify-center items-center relative">
@@ -685,14 +648,16 @@ function StoreApp() {
  </button>
 
  </form>
- </div>
- </div>
- )}
+      </>
+    )}
+  </Modal>
 
  {/* Interactive Custom Onboarding Tutorial */}
- {showTutorial && (
- <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md transition-opacity">
- <div className="bg-surface border border-border w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-fade-in relative">
+  <Modal
+    isOpen={showTutorial}
+    onClose={handleCompleteTutorial}
+    className="p-6"
+  >
  {/* Tutorial Header */}
  <div className="flex justify-between items-center mb-4">
  <span className="text-xs font-semibold text-muted">
@@ -775,51 +740,44 @@ function StoreApp() {
  )}
  </div>
 
- </div>
- </div>
- )}
+  </Modal>
 
       {/* Age Verification Modal */}
-      {showAgeVerificationModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md transition-opacity">
-          <div className="bg-surface border border-border w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-fade-in relative">
-            <button 
-              onClick={() => setShowAgeVerificationModal(false)}
-              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center bg-background rounded-full text-muted hover:text-primary transition-colors"
-            >
-              ✕
-            </button>
-            <div className="flex flex-col items-center text-center mt-2">
-              <div className="w-16 h-16 bg-danger-bg text-danger flex items-center justify-center rounded-2xl text-2xl font-bold mb-4 shadow-sm border border-danger-border">
-                18+
-              </div>
-              <h2 className="text-xl font-bold text-primary mb-2">Leeftijdscontrole</h2>
-              <p className="text-sm text-muted mb-6 leading-relaxed">
-                Dit product is alleen voor personen van 18 jaar en ouder. We moeten je leeftijd eenmalig verifiëren.
-              </p>
-
-              {ageVerificationStatus === 'PENDING' ? (
-                <div className="w-full bg-warning-bg border border-warning-border rounded-xl p-4 mb-2">
-                  <p className="text-warning text-sm font-semibold">Admin zal zo beantwoorden</p>
-                  <p className="text-warning text-xs mt-1">Je verzoek is naar de bar verstuurd.</p>
-                </div>
-              ) : ageVerificationStatus === 'REJECTED' ? (
-                <div className="w-full bg-danger-bg border border-danger-border rounded-xl p-4 mb-2">
-                  <p className="text-danger text-sm font-semibold">Verzoek afgewezen.</p>
-                  <p className="text-danger text-xs mt-1">Helaas konden we je leeftijd niet verifiëren als 18+.</p>
-                </div>
-              ) : (
-                <button
-                  onClick={handleRequestAgeVerification}
-                  className="w-full bg-primary hover:bg-primary-hover text-primary-text font-bold py-3.5 px-4 rounded-xl shadow-md transition-all active:scale-95"
-                >
-                  Stuur verzoek
-                </button>
-              )}
-            </div>
+      <Modal
+        isOpen={showAgeVerificationModal}
+        onClose={() => setShowAgeVerificationModal(false)}
+        showCloseButton={true}
+        className="p-6"
+      >
+        <div className="flex flex-col items-center text-center mt-2">
+          <div className="w-16 h-16 bg-danger-bg text-danger flex items-center justify-center rounded-2xl text-2xl font-bold mb-4 shadow-sm border border-danger-border">
+            18+
           </div>
+          <h2 className="text-xl font-bold text-primary mb-2">Leeftijdscontrole</h2>
+          <p className="text-sm text-muted mb-6 leading-relaxed">
+            Dit product is alleen voor personen van 18 jaar en ouder. We moeten je leeftijd eenmalig verifiëren.
+          </p>
+
+          {ageVerificationStatus === 'PENDING' ? (
+            <div className="w-full bg-warning-bg border border-warning-border rounded-xl p-4 mb-2">
+              <p className="text-warning text-sm font-semibold">Admin zal zo beantwoorden</p>
+              <p className="text-warning text-xs mt-1">Je verzoek is naar de bar verstuurd.</p>
+            </div>
+          ) : ageVerificationStatus === 'REJECTED' ? (
+            <div className="w-full bg-danger-bg border border-danger-border rounded-xl p-4 mb-2">
+              <p className="text-danger text-sm font-semibold">Verzoek afgewezen.</p>
+              <p className="text-danger text-xs mt-1">Helaas konden we je leeftijd niet verifiëren als 18+.</p>
+            </div>
+          ) : (
+            <button
+              onClick={handleRequestAgeVerification}
+              className="w-full bg-primary hover:bg-primary-hover text-primary-text font-bold py-3.5 px-4 rounded-xl shadow-md transition-all active:scale-95"
+            >
+              Stuur verzoek
+            </button>
+          )}
         </div>
-      )}
+      </Modal>
 
     </div>
   );
