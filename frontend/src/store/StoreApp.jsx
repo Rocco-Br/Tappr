@@ -34,18 +34,18 @@ function StoreApp() {
 
  const fetchEventAndProducts = async () => {
  try {
- const eventRes = await axios.get('http://localhost:8000/api/events/active');
+ const eventRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/events/active`);
  setActiveEvent(eventRes.data);
 
- const productsRes = await axios.get('http://localhost:8000/api/products');
+ const productsRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/products`);
  setProducts(productsRes.data);
 
- const meRes = await axios.get('http://localhost:8000/api/auth/me', {
+ const meRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
  headers: { Authorization: `Bearer ${token}` }
  });
  setIs18Plus(!!meRes.data.is_18_plus);
 
- const verificationRes = await axios.get('http://localhost:8000/api/store/age-verification', {
+ const verificationRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/store/age-verification`, {
  headers: { Authorization: `Bearer ${token}` }
  });
  if (verificationRes.data.request) {
@@ -60,7 +60,7 @@ function StoreApp() {
 
  const fetchOrders = async () => {
  try {
- const res = await axios.get('http://localhost:8000/api/orders', {
+ const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/orders`, {
  headers: { Authorization: `Bearer ${token}` }
  });
  setOrders(res.data);
@@ -73,7 +73,7 @@ function StoreApp() {
  useEffect(() => {
  let active = true;
  if (token) {
- axios.get('http://localhost:8000/api/auth/me', {
+ axios.get(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
  headers: { Authorization: `Bearer ${token}` }
  }).then(res => {
  if (!active) return;
@@ -188,7 +188,7 @@ function StoreApp() {
 
  setOrdering(true);
  try {
- await axios.post('http://localhost:8000/api/orders', {
+ await axios.post(`${import.meta.env.VITE_API_URL}/api/orders`, {
  items: [
  {
  product_id: selectedProduct.id,
@@ -217,7 +217,7 @@ function StoreApp() {
  const handleCancelOrder = async (orderId) => {
  if (!window.confirm('Weet je zeker dat je deze bestelling wilt annuleren?')) return;
  try {
- await axios.post(`http://localhost:8000/api/orders/${orderId}/cancel`, {}, {
+ await axios.post(`${import.meta.env.VITE_API_URL}/api/orders/${orderId}/cancel`, {}, {
  headers: { Authorization: `Bearer ${token}` }
  });
  fetchOrders();
@@ -244,7 +244,7 @@ function StoreApp() {
 
  const handleRequestAgeVerification = async () => {
  try {
- await axios.post('http://localhost:8000/api/store/age-verification', {}, {
+ await axios.post(`${import.meta.env.VITE_API_URL}/api/store/age-verification`, {}, {
  headers: { Authorization: `Bearer ${token}` }
  });
  setAgeVerificationStatus('PENDING');
@@ -389,8 +389,8 @@ function StoreApp() {
  >
  {/* Product Image Full-bleed */}
  {p.image_url && (
- <div className="w-full h-24 overflow-hidden border-b border-border mb-2">
- <img src={`http://localhost:8000/uploads/${p.image_url}`} alt={p.name} className="w-full h-full object-cover" />
+ <div className="w-full h-24 overflow-hidden border-b border-border mb-2 bg-white dark:bg-white/5 flex items-center justify-center">
+ <img src={`${import.meta.env.VITE_API_URL}/uploads/${p.image_url}`} alt={p.name} className="max-w-full max-h-full object-contain p-2" />
  </div>
  )}
 
@@ -526,7 +526,7 @@ function StoreApp() {
           {/* Product Image inside Modal Header */}
           {selectedProduct.image_url && (
             <div className="-mt-6 -mx-6 mb-4 h-48 bg-white/50 rounded-t-3xl border-b border-border overflow-hidden flex justify-center items-center relative">
-              <img src={`http://localhost:8000/uploads/${selectedProduct.image_url}`} alt={selectedProduct.name} className="w-full h-full object-contain p-4" />
+              <img src={`${import.meta.env.VITE_API_URL}/uploads/${selectedProduct.image_url}`} alt={selectedProduct.name} className="w-full h-full object-contain p-4" />
             </div>
           )}
 

@@ -16,7 +16,7 @@ function AdminApp() {
 
  useEffect(() => {
  if (token) {
- axios.get('http://localhost:8000/api/auth/me', {
+ axios.get(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
  headers: { Authorization: `Bearer ${token}` }
  }).then(res => {
  if (res.data.role === 'ADMIN') {

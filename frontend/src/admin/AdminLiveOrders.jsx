@@ -27,7 +27,7 @@ function AdminLiveOrders({ token }) {
 
  const fetchLiveOrders = async () => {
  try {
- const res = await axios.get('http://localhost:8000/api/admin/orders', {
+ const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/orders`, {
  headers: { Authorization: `Bearer ${token}` }
  });
  const data = res.data;
@@ -95,7 +95,7 @@ function AdminLiveOrders({ token }) {
  try {
  await Promise.all(
  orderIds.map(id =>
- axios.post(`http://localhost:8000/api/admin/orders/${id}/prepare`, {}, {
+ axios.post(`${import.meta.env.VITE_API_URL}/api/admin/orders/${id}/prepare`, {}, {
  headers: { Authorization: `Bearer ${token}` }
  })
  )
@@ -111,7 +111,7 @@ function AdminLiveOrders({ token }) {
  try {
  await Promise.all(
  orderIds.map(id =>
- axios.post(`http://localhost:8000/api/admin/orders/${id}/complete`, {}, {
+ axios.post(`${import.meta.env.VITE_API_URL}/api/admin/orders/${id}/complete`, {}, {
  headers: { Authorization: `Bearer ${token}` }
  })
  )

@@ -27,7 +27,7 @@ function AdminEvents({ token, activeEvent, fetchActiveEvent }) {
 
  const fetchEvents = async () => {
  try {
- const res = await axios.get('http://localhost:8000/api/admin/events', {
+ const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/events`, {
  headers: { Authorization: `Bearer ${token}` }
  });
  setEvents(res.data);
@@ -41,7 +41,7 @@ function AdminEvents({ token, activeEvent, fetchActiveEvent }) {
  if (!newEventName.trim()) return;
  setLoading(true);
  try {
- await axios.post('http://localhost:8000/api/admin/events', { name: newEventName }, {
+ await axios.post(`${import.meta.env.VITE_API_URL}/api/admin/events`, { name: newEventName }, {
  headers: { Authorization: `Bearer ${token}` }
  });
  setNewEventName('');
@@ -57,7 +57,7 @@ function AdminEvents({ token, activeEvent, fetchActiveEvent }) {
  const handleArchiveCurrent = async () => {
  if (!window.confirm('Weet je zeker dat je het huidige evenement wilt afsluiten en archiveren?')) return;
  try {
- await axios.post('http://localhost:8000/api/admin/events/archive', {}, {
+ await axios.post(`${import.meta.env.VITE_API_URL}/api/admin/events/archive`, {}, {
  headers: { Authorization: `Bearer ${token}` }
  });
  fetchEvents();
@@ -70,7 +70,7 @@ function AdminEvents({ token, activeEvent, fetchActiveEvent }) {
  const handleUpdateAnnouncement = async (e) => {
  e.preventDefault();
  try {
- await axios.post('http://localhost:8000/api/admin/events/announcement', {
+ await axios.post(`${import.meta.env.VITE_API_URL}/api/admin/events/announcement`, {
  announcement: announcement.trim()
  }, {
  headers: { Authorization: `Bearer ${token}` }
@@ -85,7 +85,7 @@ function AdminEvents({ token, activeEvent, fetchActiveEvent }) {
 
  const handleClearAnnouncement = async () => {
  try {
- await axios.post('http://localhost:8000/api/admin/events/announcement', {
+ await axios.post(`${import.meta.env.VITE_API_URL}/api/admin/events/announcement`, {
  announcement: ''
  }, {
  headers: { Authorization: `Bearer ${token}` }
@@ -103,7 +103,7 @@ function AdminEvents({ token, activeEvent, fetchActiveEvent }) {
  setLoadingDetails(true);
  setEventDetails(null);
  try {
- const res = await axios.get(`http://localhost:8000/api/admin/events/${eventId}/details`, {
+ const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/events/${eventId}/details`, {
  headers: { Authorization: `Bearer ${token}` }
  });
  setEventDetails(res.data);

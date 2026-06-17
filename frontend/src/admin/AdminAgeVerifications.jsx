@@ -7,7 +7,7 @@ function AdminAgeVerifications({ token }) {
 
   const fetchRequests = async () => {
     try {
-      const res = await axios.get('http://localhost:8000/api/admin/age-verifications', {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/age-verifications`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setRequests(res.data);
@@ -28,7 +28,7 @@ function AdminAgeVerifications({ token }) {
 
   const handleResolve = async (id, status) => {
     try {
-      await axios.post(`http://localhost:8000/api/admin/age-verifications/${id}/resolve`, { status }, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/admin/age-verifications/${id}/resolve`, { status }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchRequests(); // Refresh the list

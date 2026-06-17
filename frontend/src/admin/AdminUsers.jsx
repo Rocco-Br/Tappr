@@ -18,7 +18,7 @@ function AdminUsers({ token }) {
 
  const fetchUsers = async () => {
  try {
- const res = await axios.get('http://localhost:8000/api/admin/users', {
+ const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/users`, {
  headers: { Authorization: `Bearer ${token}` }
  });
  setUsers(res.data);
@@ -69,11 +69,11 @@ function AdminUsers({ token }) {
  setLoading(true);
  try {
  if (editingUserId) {
- await axios.put(`http://localhost:8000/api/admin/users/${editingUserId}`, formData, {
+ await axios.put(`${import.meta.env.VITE_API_URL}/api/admin/users/${editingUserId}`, formData, {
  headers: { Authorization: `Bearer ${token}` }
  });
  } else {
- await axios.post('http://localhost:8000/api/admin/users', formData, {
+ await axios.post(`${import.meta.env.VITE_API_URL}/api/admin/users`, formData, {
  headers: { Authorization: `Bearer ${token}` }
  });
  }
@@ -98,7 +98,7 @@ function AdminUsers({ token }) {
  const handleDeleteUser = async (id, name) => {
  if (!window.confirm(`Weet je zeker dat je gebruiker"${name}" wilt verwijderen?`)) return;
  try {
- await axios.delete(`http://localhost:8000/api/admin/users/${id}`, {
+ await axios.delete(`${import.meta.env.VITE_API_URL}/api/admin/users/${id}`, {
  headers: { Authorization: `Bearer ${token}` }
  });
  fetchUsers();

@@ -11,7 +11,7 @@ function AdminInventory({ token }) {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get('http://localhost:8000/api/admin/products', {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/products`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       // Sort so OUT_OF_STOCK is at the bottom, otherwise alphabetical
@@ -36,7 +36,7 @@ function AdminInventory({ token }) {
   const saveStock = async (id, amount, unit) => {
     setSavingId(id);
     try {
-      await axios.put(`http://localhost:8000/api/admin/products/${id}/stock`, {
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/admin/products/${id}/stock`, {
         stock_amount: amount,
         stock_unit: unit
       }, {
@@ -98,7 +98,7 @@ function AdminInventory({ token }) {
             <div className="h-32 bg-background relative border-b border-border">
               {p.image_url ? (
                 <img 
-                  src={`http://localhost:8000/uploads/${p.image_url}`} 
+                  src={`${import.meta.env.VITE_API_URL}/uploads/${p.image_url}`} 
                   alt={p.name} 
                   className={`w-full h-full object-cover ${p.status === 'OUT_OF_STOCK' ? 'grayscale opacity-50' : ''}`}
                 />

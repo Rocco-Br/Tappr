@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
 import Drawer from '../components/Drawer';
+import ToggleSwitch from '../components/ToggleSwitch';
 
 function AdminProducts({ token }) {
  const [products, setProducts] = useState([]);
@@ -29,7 +30,7 @@ function AdminProducts({ token }) {
 
  const fetchProducts = async () => {
  try {
- const res = await axios.get('http://localhost:8000/api/admin/products', {
+ const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/products`, {
  headers: { Authorization: `Bearer ${token}` }
  });
  setProducts(res.data);
@@ -52,7 +53,7 @@ function AdminProducts({ token }) {
 
  setUploading(true);
  try {
- const res = await axios.post('http://localhost:8000/api/admin/products/upload', data, {
+ const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/admin/products/upload`, data, {
  headers: {
  'Content-Type': 'multipart/form-data',
  Authorization: `Bearer ${token}`
@@ -186,11 +187,11 @@ function AdminProducts({ token }) {
  };
 
  if (editingProductId) {
- await axios.put(`http://localhost:8000/api/admin/products/${editingProductId}`, payload, {
+ await axios.put(`${import.meta.env.VITE_API_URL}/api/admin/products/${editingProductId}`, payload, {
  headers: { Authorization: `Bearer ${token}` }
  });
  } else {
- await axios.post('http://localhost:8000/api/admin/products', payload, {
+ await axios.post(`${import.meta.env.VITE_API_URL}/api/admin/products`, payload, {
  headers: { Authorization: `Bearer ${token}` }
  });
  }
@@ -208,7 +209,7 @@ function AdminProducts({ token }) {
  const toggleStatus = async (product) => {
  const newStatus = product.status === 'AVAILABLE' ? 'OUT_OF_STOCK' : 'AVAILABLE';
  try {
- await axios.put(`http://localhost:8000/api/admin/products/${product.id}`, { ...product, status: newStatus }, {
+ await axios.put(`${import.meta.env.VITE_API_URL}/api/admin/products/${product.id}`, { ...product, status: newStatus }, {
  headers: { Authorization: `Bearer ${token}` }
  });
  fetchProducts();
@@ -398,10 +399,10 @@ function AdminProducts({ token }) {
  <div key={p.id} className="group bg-surface border border-border rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between overflow-hidden">
  <div>
  {/* Image & status badges container */}
- <div className="h-44 overflow-hidden relative bg-background border-b border-border-subtle">
+ <div className="h-44 overflow-hidden relative bg-white dark:bg-white/5 border-b border-border-subtle flex items-center justify-center">
  {p.image_url ? (
- <img src={`http://localhost:8000/uploads/${p.image_url}`} alt={p.name}
- className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
+ <img src={`${import.meta.env.VITE_API_URL}/uploads/${p.image_url}`} alt={p.name}
+ className="max-w-full max-h-full object-contain p-2 group-hover:scale-102 transition-transform duration-300"
  />
  ) : (
  <div className="w-full h-full flex flex-col items-center justify-center text-secondary">
@@ -478,7 +479,7 @@ function AdminProducts({ token }) {
  <div className="px-4 pb-4 pt-2 border-t border-zinc-50 flex gap-2">
  <button
  onClick={() => handleEdit(p)}
- className="flex-1 text-center font-semibold text-xs text-secondary bg-zinc-100 hover:bg-surface-hover py-2 rounded-xl transition-all shadow-sm"
+ className="flex-1 text-center font-semibold text-xs text-secondary bg-surface hover:bg-surface-hover border border-border py-2 rounded-xl transition-all shadow-sm"
  >
  Bewerken
  </button>
@@ -486,8 +487,8 @@ function AdminProducts({ token }) {
  onClick={() => toggleStatus(p)}
  className={`flex-1 text-center font-bold text-xs py-2 rounded-xl border transition-all ${
  p.status === 'AVAILABLE'
- ? 'bg-surface text-zinc-700 hover:bg-background border-border shadow-sm'
- : 'bg-black text-white hover:bg-zinc-900 border-transparent shadow-md'
+ ? 'bg-surface text-secondary hover:bg-background border-border shadow-sm'
+ : 'bg-primary text-primary-text hover:bg-primary-hover border-transparent shadow-md'
  }`}
  >
  {p.status === 'AVAILABLE' ? 'Zet op Op' : 'Zet op Beschikbaar'}
@@ -517,7 +518,7 @@ function AdminProducts({ token }) {
  <td className="px-6 py-4">
  <div className="flex items-center gap-3">
  {p.image_url ? (
- <img src={`http://localhost:8000/uploads/${p.image_url}`} alt={p.name}
+ <img src={`${import.meta.env.VITE_API_URL}/uploads/${p.image_url}`} alt={p.name}
  className="w-10 h-10 object-cover rounded-lg border border-border"
  />
  ) : (
@@ -623,7 +624,7 @@ function AdminProducts({ token }) {
         <button
           type="button"
           onClick={handleCloseDrawer}
-          className="flex-1 bg-white hover:bg-surface text-secondary py-3 rounded-xl font-bold text-xs border border-border shadow-sm transition-colors text-center"
+          className="flex-1 bg-surface hover:bg-surface-hover text-secondary py-3 rounded-xl font-bold text-xs border border-border shadow-sm transition-colors text-center"
         >
           Annuleren
         </button>
@@ -631,7 +632,7 @@ function AdminProducts({ token }) {
           type="submit"
           form="drawer-product-form"
           disabled={loading || uploading}
-          className="flex-1 bg-primary hover:bg-primary-hover text-primary-text text-primary-text py-3 rounded-xl font-bold text-xs shadow-md transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 text-center"
+          className="flex-1 bg-primary hover:bg-primary-hover text-primary-text py-3 rounded-xl font-bold text-xs shadow-md transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 text-center"
         >
           {loading ? 'Opslaan...' : editingProductId ? 'Opslaan' : 'Toevoegen'}
         </button>
@@ -672,16 +673,12 @@ function AdminProducts({ token }) {
 
  {/* Section: Receptuur / Samenstelling */}
   <div className="space-y-4 pt-2 border-t border-border">
-    <label className="flex items-center gap-3 cursor-pointer group">
-      <div className={`w-10 h-5 flex items-center rounded-full p-1 transition-colors duration-200 ${formData.is_composition ? 'bg-primary' : 'bg-surface border border-border'}`}>
-        <div className={`bg-white w-3 h-3 rounded-full shadow-sm transform transition-transform duration-200 ${formData.is_composition ? 'translate-x-5' : 'translate-x-0'}`} />
-      </div>
-      <div>
-        <span className="text-xs font-bold text-primary group-hover:text-primary-hover transition-colors block">Dit is een samenstelling (Cocktail / Mix)</span>
-        <span className="text-[10px] text-muted">Dit product trekt voorraad af van andere ingrediënten.</span>
-      </div>
-      <input type="checkbox" checked={formData.is_composition} onChange={e => setFormData({...formData, is_composition: e.target.checked})} className="hidden" />
-    </label>
+    <ToggleSwitch 
+      checked={formData.is_composition} 
+      onChange={e => setFormData({...formData, is_composition: e.target.checked})} 
+      label="Dit is een samenstelling (Cocktail / Mix)" 
+      description="Dit product trekt voorraad af van andere ingrediënten." 
+    />
 
     {formData.is_composition && (
       <div className="p-4 bg-background border border-border rounded-xl space-y-3 animate-slide-in">
@@ -784,7 +781,7 @@ function AdminProducts({ token }) {
 
  {formData.image_url && (
  <div className="flex items-center gap-2.5 mt-2 bg-background p-2.5 rounded-xl border border-border">
- <img src={`http://localhost:8000/uploads/${formData.image_url}`} alt="Preview" className="w-12 h-12 object-cover rounded-lg border border-border"
+ <img src={`${import.meta.env.VITE_API_URL}/uploads/${formData.image_url}`} alt="Preview" className="w-12 h-12 object-cover rounded-lg border border-border"
  />
  <div className="flex-1 min-w-0">
  <div className="text-[10px] font-bold text-muted truncate">{formData.image_url}</div>

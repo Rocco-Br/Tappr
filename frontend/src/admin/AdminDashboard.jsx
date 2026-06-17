@@ -16,7 +16,7 @@ function AdminDashboard({ token, setToken }) {
 
  const fetchActiveEvent = async () => {
  try {
- const res = await axios.get('http://localhost:8000/api/events/active');
+ const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/events/active`);
  setActiveEvent(res.data);
  } catch (err) {
  console.error(err);
@@ -38,7 +38,7 @@ function AdminDashboard({ token, setToken }) {
   const fetchNotifications = async () => {
     if (!token) return;
     try {
-      const res = await axios.get('http://localhost:8000/api/admin/notifications', {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/notifications`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setNotifications(res.data);
@@ -49,7 +49,7 @@ function AdminDashboard({ token, setToken }) {
 
   const handleReadNotification = async (id) => {
     try {
-      await axios.post(`http://localhost:8000/api/admin/notifications/${id}/read`, {}, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/admin/notifications/${id}/read`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchNotifications();
@@ -60,7 +60,7 @@ function AdminDashboard({ token, setToken }) {
 
   const handleReadAllNotifications = async () => {
     try {
-      await axios.post('http://localhost:8000/api/admin/notifications/read-all', {}, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/admin/notifications/read-all`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchNotifications();
