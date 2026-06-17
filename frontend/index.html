@@ -11,6 +11,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   </head>
   <body class="bg-background text-primary min-h-screen font-sans selection:bg-primary selection:text-primary-text antialiased">
+    <!-- Drag and Drop Polyfill for Mobile/Touch -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mobile-drag-drop@2.3.0-rc.2/default.css">
+    <script src="https://cdn.jsdelivr.net/npm/mobile-drag-drop@2.3.0-rc.2/index.min.js"></script>
+    <script>
+      window.addEventListener('load', function() {
+        MobileDragDrop.polyfill({
+          holdToDrag: 250 // hold for 250ms to drag, so scrolling still works
+        });
+        
+        // Prevent scrolling while dragging
+        window.addEventListener('touchmove', function() {}, {passive: false});
+      });
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
