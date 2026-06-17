@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
+import Drawer from '../components/Drawer';
 
 function AdminProducts({ token }) {
  const [products, setProducts] = useState([]);
@@ -612,40 +613,31 @@ function AdminProducts({ token }) {
  </div>
  )}
 
- {createPortal(
- <>
- {/* Slide-over Drawer Backdrop overlay */}
- <div onClick={handleCloseDrawer}
- className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-50 transition-opacity duration-300 ${
- isDrawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
- }`}
- />
-
- {/* Slide-over Drawer container */}
- <div className={`fixed right-0 top-0 bottom-0 w-full max-w-md bg-surface z-50 shadow-2xl flex flex-col justify-between transition-transform duration-300 ease-out transform ${
- isDrawerOpen ? 'translate-x-0' : 'translate-x-full'
- }`}>
- {/* Drawer Header */}
- <div className="p-6 border-b border-border flex justify-between items-center">
- <div>
- <h2 className="text-lg font-bold tracking-tight text-primary">
- {editingProductId ? 'Product Bewerken' : 'Nieuw Product'}
- </h2>
- <p className="text-xs text-muted mt-0.5">
- {editingProductId ? 'Pas productdetails en custom velden aan' : 'Voeg een nieuw item toe aan het assortiment'}
- </p>
- </div>
- <button onClick={handleCloseDrawer}
- className="w-8 h-8 rounded-full bg-zinc-100 hover:bg-surface text-muted flex items-center justify-center transition-colors"
- >
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="currentColor" className="w-4 h-4">
- <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
- </svg>
- </button>
- </div>
-
- {/* Drawer Scrollable Content */}
- <div className="flex-1 overflow-y-auto p-6 space-y-6">
+  <Drawer
+    isOpen={isDrawerOpen}
+    onClose={handleCloseDrawer}
+    title={editingProductId ? 'Product Bewerken' : 'Nieuw Product'}
+    description={editingProductId ? 'Pas productdetails en custom velden aan' : 'Voeg een nieuw item toe aan het assortiment'}
+    footer={
+      <div className="flex gap-3 w-full">
+        <button
+          type="button"
+          onClick={handleCloseDrawer}
+          className="flex-1 bg-white hover:bg-surface text-secondary py-3 rounded-xl font-bold text-xs border border-border shadow-sm transition-colors text-center"
+        >
+          Annuleren
+        </button>
+        <button
+          type="submit"
+          form="drawer-product-form"
+          disabled={loading || uploading}
+          className="flex-1 bg-primary hover:bg-primary-hover text-primary-text text-primary-text py-3 rounded-xl font-bold text-xs shadow-md transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 text-center"
+        >
+          {loading ? 'Opslaan...' : editingProductId ? 'Opslaan' : 'Toevoegen'}
+        </button>
+      </div>
+    }
+  >
  <form id="drawer-product-form" onSubmit={handleSubmit} className="space-y-6">
  {/* Section 1: Algemeen */}
  <div className="space-y-4">
@@ -970,30 +962,9 @@ function AdminProducts({ token }) {
  )}
  </div>
  </form>
- </div>
 
- {/* Drawer Sticky Footer with action buttons */}
- <div className="p-6 border-t border-border flex gap-3 bg-zinc-50">
- <button
- type="button"
- onClick={handleCloseDrawer}
- className="flex-1 bg-white hover:bg-surface text-secondary py-3 rounded-xl font-bold text-xs border border-border shadow-sm transition-colors text-center"
- >
- Annuleren
- </button>
- <button
- type="submit"
- form="drawer-product-form"
- disabled={loading || uploading}
- className="flex-1 bg-primary hover:bg-primary-hover text-primary-text text-primary-text py-3 rounded-xl font-bold text-xs shadow-md transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 text-center"
- >
- {loading ? 'Opslaan...' : editingProductId ? 'Opslaan' : 'Toevoegen'}
- </button>
- </div>
- </div>
- </>,
- document.body
- )}
+
+      </Drawer>
 
  </div>
  );
