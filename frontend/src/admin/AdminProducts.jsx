@@ -41,6 +41,7 @@ function AdminProducts({ token }) {
       fetchProducts();
     }, 0);
     return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const uploadFile = async (file) => {
@@ -281,7 +282,7 @@ function AdminProducts({ token }) {
     <div className="space-y-6 animate-fade-in">
       
       {/* Premium Page Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white/80 dark:bg-zinc-950/80 backdrop-blur border border-border rounded-2xl p-6 shadow-sm">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-surface/80 backdrop-blur border border-border rounded-2xl p-6 shadow-sm">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Menukaart Beheer</h1>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
@@ -315,7 +316,7 @@ function AdminProducts({ token }) {
               placeholder="Zoek product op naam, omschrijving of categorie..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-xs font-medium focus:bg-white dark:focus:bg-zinc-900 focus:ring-1 focus:ring-black dark:focus:ring-white transition-all shadow-sm"
+              className="w-full pl-10 pr-4 py-2.5 bg-surface border border-zinc-200 dark:border-zinc-800 rounded-xl text-xs font-medium focus:bg-surface dark:focus:bg-zinc-900 focus:ring-1 focus:ring-black dark:focus:ring-white transition-all shadow-sm"
             />
           </div>
 
@@ -362,7 +363,7 @@ function AdminProducts({ token }) {
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap shadow-sm border border-transparent ${
                   isSelected 
                     ? 'bg-black text-white dark:bg-white dark:text-black' 
-                    : 'bg-white dark:bg-zinc-950 text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 border-zinc-200 dark:border-zinc-800'
+                    : 'bg-surface text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 border-zinc-200 dark:border-zinc-800'
                 }`}
               >
                 <span>{cat}</span>
@@ -381,7 +382,7 @@ function AdminProducts({ token }) {
 
       {/* Main Content Area */}
       {filteredProducts.length === 0 ? (
-        <div className="bg-white dark:bg-zinc-950 border border-dashed border-zinc-300 dark:border-zinc-850 rounded-2xl p-12 text-center shadow-sm">
+        <div className="bg-surface border border-dashed border-zinc-300 dark:border-zinc-850 rounded-2xl p-12 text-center shadow-sm">
           <div className="w-12 h-12 rounded-full border border-dashed border-zinc-300 dark:border-zinc-800 flex items-center justify-center mx-auto mb-4 text-zinc-400">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.604 10.604Z" />
@@ -396,7 +397,7 @@ function AdminProducts({ token }) {
         /* GRID VIEW */
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredProducts.map(p => (
-            <div key={p.id} className="group bg-white dark:bg-zinc-950 border border-border rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between overflow-hidden">
+            <div key={p.id} className="group bg-surface border border-border rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between overflow-hidden">
               <div>
                 {/* Image & status badges container */}
                 <div className="h-44 overflow-hidden relative bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-100 dark:border-zinc-900">
@@ -491,7 +492,7 @@ function AdminProducts({ token }) {
                   onClick={() => toggleStatus(p)}
                   className={`flex-1 text-center font-bold text-xs py-2 rounded-xl border transition-all ${
                     p.status === 'AVAILABLE'
-                      ? 'bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-950 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 shadow-sm'
+                      ? 'bg-surface text-zinc-700 hover:bg-background dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 shadow-sm'
                       : 'bg-black text-white hover:bg-zinc-900 dark:bg-white dark:text-black dark:hover:bg-zinc-100 border-transparent shadow-md'
                   }`}
                 >
@@ -503,7 +504,7 @@ function AdminProducts({ token }) {
         </div>
       ) : (
         /* LIST VIEW (TABLE) */
-        <div className="bg-white dark:bg-zinc-950 border border-border rounded-2xl overflow-hidden shadow-sm">
+        <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -631,7 +632,7 @@ function AdminProducts({ token }) {
           />
 
           {/* Slide-over Drawer container */}
-          <div className={`fixed right-0 top-0 bottom-0 w-full max-w-md bg-white dark:bg-zinc-900 z-50 shadow-2xl flex flex-col justify-between transition-transform duration-300 ease-out transform ${
+          <div className={`fixed right-0 top-0 bottom-0 w-full max-w-md bg-surface z-50 shadow-2xl flex flex-col justify-between transition-transform duration-300 ease-out transform ${
             isDrawerOpen ? 'translate-x-0' : 'translate-x-full'
           }`}>
             {/* Drawer Header */}
