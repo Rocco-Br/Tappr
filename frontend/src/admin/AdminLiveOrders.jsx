@@ -148,12 +148,17 @@ function AdminLiveOrders({ token }) {
 
  // Format wait timer (MM:SS)
  const formatWaitTime = (createdAtString) => {
- const diffMs = new Date() - new Date(createdAtString);
- const diffSecs = Math.max(0, Math.floor(diffMs / 1000));
- const mins = Math.floor(diffSecs / 60);
- const secs = diffSecs % 60;
- return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
- };
+    // If the date string does not have a timezone indicator (like Z), append it so it's parsed as UTC
+    let dateStr = createdAtString;
+    if (!dateStr.endsWith('Z') && !dateStr.includes('+')) {
+      dateStr = dateStr.replace(' ', 'T') + 'Z';
+    }
+    const diffMs = new Date() - new Date(dateStr);
+    const diffSecs = Math.max(0, Math.floor(diffMs / 1000));
+    const mins = Math.floor(diffSecs / 60);
+    const secs = diffSecs % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
  // HTML5 Drag and Drop handlers
  const handleDragStart = (e, guestName, orderIds) => {
@@ -166,9 +171,12 @@ function AdminLiveOrders({ token }) {
  setDragOverZone(true);
  };
 
- const handleDragLeave = () => {
- setDragOverZone(false);
- };
+  const handleDragLeave = (e) => {
+    // Only reset if we are actually leaving the drop zone container, not just entering a child element
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setDragOverZone(false);
+    }
+  };
 
  const handleDrop = (e) => {
  e.preventDefault();
@@ -216,7 +224,7 @@ function AdminLiveOrders({ token }) {
  ) : (
  <>
  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 opacity-50">
- <path d="M5.555 4.09A1 1 0 0 0 4.09 5.555L7.535 9H4a1 1 0 0 0-1 1v3.586l-.707.707A1 1 0 0 0 3 16h8.465l3.98 3.98a1 1 0 0 0 1.414-1.414l-11.304-11.3ZM11 18a3 3 0 0 1-3-3h6a3 3 0 0 1-3 3ZM10 2a6 6 0 0 0-6 6v1.465l11.304 11.304A6 6 0 0 0 16 8v3.586l.707.707A1 1 0 0 0 17 14V8a6 6 0 0 0-6-6Z" />
+ <path fillRule="evenodd" clipRule="evenodd" d="M5.555 4.09A1 1 0 0 0 4.09 5.555L7.535 9H4a1 1 0 0 0-1 1v3.586l-.707.707A1 1 0 0 0 3 16h8.465l3.98 3.98a1 1 0 0 0 1.414-1.414l-11.304-11.3ZM11 18a3 3 0 0 1-3-3h6a3 3 0 0 1-3 3ZM10 2a6 6 0 0 0-6 6v1.465l11.304 11.304A6 6 0 0 0 16 8v3.586l.707.707A1 1 0 0 0 17 14V8a6 6 0 0 0-6-6Z" />
  </svg>
  Geluid Uit
  </>
@@ -343,37 +351,36 @@ function AdminLiveOrders({ token }) {
 
  {/* Drag and Drop Afrond-Zone (Column 4) */}
  <div className="lg:col-span-1">
- <div
- onDragOver={handleDragOver}
- onDragLeave={handleDragLeave}
- onDrop={handleDrop}
- className={`min-h-[320px] rounded-3xl border-2 border-dashed flex flex-col items-center justify-center p-6 text-center transition-all duration-200 h-full ${
- dragOverZone
- ? 'bg-primary text-primary-text border-transparent scale-[1.02] shadow-lg'
- : 'bg-background border-zinc-300 text-zinc-400'
- }`}
- >
- <div className={`w-14 h-14 rounded-full border-2 border-dashed flex items-center justify-center mb-4 transition-colors ${
- dragOverZone ? 'border-primary text-primary-text' : 'border-border'
- }`}>
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="currentColor" className="w-7 h-7">
- <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
- </svg>
- </div>
- <h3 className={`font-bold text-sm mb-1 transition-colors ${
- dragOverZone ? 'text-primary-text' : 'text-primary'
- }`}>
- Afrond Zone
- </h3>
- <p className="text-xs text-muted max-w-[150px] mx-auto leading-relaxed">
- Sleep een klantkaart hiernaartoe om deze bestellingen direct te voltooien
- </p>
- </div>
- </div>
-
- </div>
- </div>
- );
+        <div
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={`min-h-[320px] rounded-3xl border-2 flex flex-col items-center justify-center p-6 text-center transition-all duration-200 h-full ${
+            dragOverZone
+              ? 'border-primary bg-primary/5 text-primary scale-[1.02] shadow-sm border-solid'
+              : 'border-dashed border-zinc-300 bg-background text-zinc-400'
+          }`}
+        >
+          <div className={`w-14 h-14 rounded-full border-2 border-dashed flex items-center justify-center mb-4 transition-colors ${
+            dragOverZone ? 'border-primary text-primary' : 'border-border'
+          }`}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="currentColor" className="w-7 h-7">
+              <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+            </svg>
+          </div>
+          <h3 className={`font-bold text-sm mb-1 transition-colors ${
+            dragOverZone ? 'text-primary' : 'text-primary'
+          }`}>
+            Afrond Zone
+          </h3>
+          <p className="text-xs text-muted max-w-[150px] mx-auto leading-relaxed">
+            Sleep een klantkaart hiernaartoe om deze bestellingen direct te voltooien
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  );
 }
 
 export default AdminLiveOrders;
