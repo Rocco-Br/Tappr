@@ -43,6 +43,15 @@ db.exec(`
     FOREIGN KEY(product_id) REFERENCES Products(id) ON DELETE CASCADE
   );
 
+  CREATE TABLE IF NOT EXISTS ProductIngredients (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    product_id INTEGER NOT NULL,
+    ingredient_product_id INTEGER NOT NULL,
+    amount INTEGER NOT NULL,
+    FOREIGN KEY(product_id) REFERENCES Products(id) ON DELETE CASCADE,
+    FOREIGN KEY(ingredient_product_id) REFERENCES Products(id) ON DELETE CASCADE
+  );
+
   CREATE TABLE IF NOT EXISTS Orders (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
