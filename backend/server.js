@@ -233,9 +233,18 @@ app.get('/api/products', (req, res) => {
         ...opt,
         choices: JSON.parse(opt.choices || '[]')
       }));
-      const ingredients = db.prepare("SELECT * FROM ProductIngredients WHERE product_id = ?").all(p.id);
+      const ingredients = db.prepare(`
+        SELECT pi.*, p.status as ingredient_status 
+        FROM ProductIngredients pi 
+        JOIN Products p ON pi.ingredient_product_id = p.id 
+        WHERE pi.product_id = ?
+      `).all(p.id);
+      
+      const isOutOfStock = p.status === 'OUT_OF_STOCK' || ingredients.some(ing => ing.ingredient_status === 'OUT_OF_STOCK');
+
       return {
         ...p,
+        status: isOutOfStock ? 'OUT_OF_STOCK' : p.status,
         is_18_plus: !!p.is_18_plus,
         options: parsedOptions,
         ingredients: ingredients
@@ -256,9 +265,18 @@ app.get('/api/admin/products', authenticate, requireAdmin, (req, res) => {
         ...opt,
         choices: JSON.parse(opt.choices || '[]')
       }));
-      const ingredients = db.prepare("SELECT * FROM ProductIngredients WHERE product_id = ?").all(p.id);
+      const ingredients = db.prepare(`
+        SELECT pi.*, p.status as ingredient_status 
+        FROM ProductIngredients pi 
+        JOIN Products p ON pi.ingredient_product_id = p.id 
+        WHERE pi.product_id = ?
+      `).all(p.id);
+      
+      const isOutOfStock = p.status === 'OUT_OF_STOCK' || ingredients.some(ing => ing.ingredient_status === 'OUT_OF_STOCK');
+
       return {
         ...p,
+        status: isOutOfStock ? 'OUT_OF_STOCK' : p.status,
         is_18_plus: !!p.is_18_plus,
         options: parsedOptions,
         ingredients: ingredients
@@ -402,6 +420,20 @@ app.post('/api/orders', authenticate, (req, res) => {
           JSON.stringify(item.selected_options || {}),
           item.remark || ''
         );
+        
+        // Deduct stock
+        const ingredients = db.prepare("SELECT * FROM ProductIngredients WHERE product_id = ?").all(item.product_id);
+        if (ingredients.length > 0) {
+          // It's a composition, deduct from ingredients
+          for (const ing of ingredients) {
+            db.prepare("UPDATE Products SET stock_amount = stock_amount - ? WHERE id = ? AND stock_amount IS NOT NULL").run(ing.amount, ing.ingredient_product_id);
+            db.prepare("UPDATE Products SET status = 'OUT_OF_STOCK' WHERE id = ? AND stock_amount <= 0 AND stock_amount IS NOT NULL").run(ing.ingredient_product_id);
+          }
+        } else {
+          // Normal product, deduct from itself
+          db.prepare("UPDATE Products SET stock_amount = stock_amount - 1 WHERE id = ? AND stock_amount IS NOT NULL").run(item.product_id);
+          db.prepare("UPDATE Products SET status = 'OUT_OF_STOCK' WHERE id = ? AND stock_amount <= 0 AND stock_amount IS NOT NULL").run(item.product_id);
+        }
       }
       return orderId;
     });
