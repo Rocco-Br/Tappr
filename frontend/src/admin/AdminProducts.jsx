@@ -11,7 +11,9 @@ function AdminProducts({ token }) {
  is_18_plus: false,
  status: 'AVAILABLE',
  image_url: '',
- options: [] // [{ name: '', type: 'select', choices: [] }]
+ options: [], // [{ name: '', type: 'select', choices: [] }]
+ is_composition: false,
+ ingredients: [] // [{ ingredient_id: '', amount: '' }]
  });
  const [editingProductId, setEditingProductId] = useState(null);
  const [loading, setLoading] = useState(false);
@@ -105,7 +107,9 @@ function AdminProducts({ token }) {
  name: opt.name,
  type: opt.type || 'select',
  choices: opt.choices || []
- })) : []
+ })) : [],
+ is_composition: product.ingredients && product.ingredients.length > 0,
+ ingredients: product.ingredients ? product.ingredients.map(i => ({ ingredient_id: i.ingredient_product_id, amount: i.amount })) : []
  });
  setIsDrawerOpen(true);
  };
@@ -119,7 +123,9 @@ function AdminProducts({ token }) {
  is_18_plus: false,
  status: 'AVAILABLE',
  image_url: '',
- options: []
+ options: [],
+ is_composition: false,
+ ingredients: []
  });
  setIsDrawerOpen(true);
  };
@@ -134,7 +140,9 @@ function AdminProducts({ token }) {
  is_18_plus: false,
  status: 'AVAILABLE',
  image_url: '',
- options: []
+ options: [],
+ is_composition: false,
+ ingredients: []
  });
  const fileInput = document.getElementById('product-image-file');
  if (fileInput) fileInput.value = '';
@@ -171,7 +179,9 @@ function AdminProducts({ token }) {
  is_18_plus: formData.is_18_plus,
  status: formData.status,
  image_url: formData.image_url,
- options: optionsArray
+ options: optionsArray,
+ is_composition: formData.is_composition,
+ ingredients: formData.is_composition ? formData.ingredients.filter(i => i.ingredient_id && i.amount) : []
  };
 
  if (editingProductId) {
@@ -668,7 +678,83 @@ function AdminProducts({ token }) {
  </div>
  </div>
 
- {/* Section 2: Afbeelding & Extra */}
+ {/* Section: Receptuur / Samenstelling */}
+  <div className="space-y-4 pt-2 border-t border-border">
+    <label className="flex items-center gap-3 cursor-pointer group">
+      <div className={`w-10 h-5 flex items-center rounded-full p-1 transition-colors duration-200 ${formData.is_composition ? 'bg-primary' : 'bg-surface border border-border'}`}>
+        <div className={`bg-white w-3 h-3 rounded-full shadow-sm transform transition-transform duration-200 ${formData.is_composition ? 'translate-x-5' : 'translate-x-0'}`} />
+      </div>
+      <div>
+        <span className="text-xs font-bold text-primary group-hover:text-primary-hover transition-colors block">Dit is een samenstelling (Cocktail / Mix)</span>
+        <span className="text-[10px] text-muted">Dit product trekt voorraad af van andere ingrediënten.</span>
+      </div>
+      <input type="checkbox" checked={formData.is_composition} onChange={e => setFormData({...formData, is_composition: e.target.checked})} className="hidden" />
+    </label>
+
+    {formData.is_composition && (
+      <div className="p-4 bg-background border border-border rounded-xl space-y-3 animate-slide-in">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Ingrediëntenlijst</span>
+          <button 
+            type="button" 
+            onClick={() => setFormData({...formData, ingredients: [...formData.ingredients, { ingredient_id: '', amount: '' }]})}
+            className="text-[10px] font-bold text-primary hover:text-primary-hover flex items-center gap-1"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3 h-3"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+            Toevoegen
+          </button>
+        </div>
+        
+        {formData.ingredients.length === 0 ? (
+          <div className="text-center py-4 border border-dashed border-border rounded-lg"><span className="text-[10px] text-secondary font-semibold">Voeg ingrediënten toe die afgeschreven moeten worden.</span></div>
+        ) : (
+          formData.ingredients.map((ing, i) => (
+            <div key={i} className="flex gap-2 items-center">
+              <select 
+                value={ing.ingredient_id} 
+                onChange={e => {
+                  const newIngs = [...formData.ingredients];
+                  newIngs[i].ingredient_id = e.target.value;
+                  setFormData({...formData, ingredients: newIngs});
+                }}
+                className="flex-1 bg-surface border border-border rounded-lg px-2 py-1.5 text-xs text-primary focus:outline-none focus:border-primary"
+                required={formData.is_composition}
+              >
+                <option value="">Selecteer product...</option>
+                {products.filter(p => !p.is_composition && p.id !== editingProductId).map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+              <input 
+                type="number" 
+                placeholder="Aantal/ml" 
+                value={ing.amount}
+                onChange={e => {
+                  const newIngs = [...formData.ingredients];
+                  newIngs[i].amount = e.target.value;
+                  setFormData({...formData, ingredients: newIngs});
+                }}
+                className="w-20 bg-surface border border-border rounded-lg px-2 py-1.5 text-xs text-primary focus:outline-none focus:border-primary"
+                required={formData.is_composition}
+              />
+              <button 
+                type="button" 
+                onClick={() => {
+                  const newIngs = formData.ingredients.filter((_, idx) => idx !== i);
+                  setFormData({...formData, ingredients: newIngs});
+                }}
+                className="text-muted hover:text-danger p-1"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+          ))
+        )}
+      </div>
+    )}
+  </div>
+
+  {/* Section 2: Afbeelding & Extra */}
  <div className="space-y-4">
  <span className="text-[10px] font-extrabold text-muted uppercase tracking-wider block border-b border-border-subtle pb-1">Media & restricties</span>
  {/* Premium Drag-and-drop Image Uploader */}
