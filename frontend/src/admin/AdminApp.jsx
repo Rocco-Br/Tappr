@@ -42,8 +42,7 @@ function AdminApp() {
 
  return (
  <Routes>
- <Route path="/" element={<AdminDashboard token={token} setToken={setToken} />} />
- <Route path="*" element={<Navigate to="/" />} />
+ <Route path="*" element={<AdminDashboard token={token} setToken={setToken} />} />
  </Routes>
  );
 }
