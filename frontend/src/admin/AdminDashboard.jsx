@@ -10,6 +10,8 @@ function AdminDashboard({ token, setToken }) {
  const [activeTab, setActiveTab] = useState('dashboard');
  const [activeEvent, setActiveEvent] = useState(null);
  const [isDark, setIsDark] = useState(document.documentElement.classList.contains('dark'));
+ const [notifications, setNotifications] = useState([]);
+ const [showNotifications, setShowNotifications] = useState(false);
 
  const toggleDarkMode = () => {
  const nextIsDark = !isDark;
@@ -32,12 +34,53 @@ function AdminDashboard({ token, setToken }) {
  }
  };
 
- useEffect(() => {
- const timer = setTimeout(() => {
- fetchActiveEvent();
- }, 0);
- return () => clearTimeout(timer);
- }, []);
+  useEffect(() => {
+    const fetchActiveEventAndNotifications = async () => {
+      await fetchActiveEvent();
+      await fetchNotifications();
+    };
+    fetchActiveEventAndNotifications();
+    const timer = setInterval(() => {
+      fetchNotifications();
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const fetchNotifications = async () => {
+    if (!token) return;
+    try {
+      const res = await axios.get('http://localhost:8000/api/admin/notifications', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setNotifications(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleReadNotification = async (id) => {
+    try {
+      await axios.post(`http://localhost:8000/api/admin/notifications/${id}/read`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchNotifications();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleReadAllNotifications = async () => {
+    try {
+      await axios.post('http://localhost:8000/api/admin/notifications/read-all', {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchNotifications();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const unreadCount = notifications.filter(n => !n.is_read).length;
 
  const handleLogout = () => {
  localStorage.removeItem('adminToken');
@@ -75,7 +118,56 @@ function AdminDashboard({ token, setToken }) {
  )}
  </div>
  </div>
- <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
+          {/* Notification Bell */}
+          <div className="relative">
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
+              className={`relative w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${showNotifications ? 'bg-primary text-primary-text' : 'bg-surface hover:bg-surface-hover text-muted'}`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="currentColor" className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+              </svg>
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-danger rounded-full border-2 border-surface flex items-center justify-center animate-pulse">
+                  <span className="absolute w-full h-full rounded-full bg-danger opacity-75 animate-ping"></span>
+                </span>
+              )}
+            </button>
+
+            {/* Notification Dropdown */}
+            {showNotifications && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)}></div>
+                <div className="absolute right-0 mt-2 w-80 bg-surface border border-border rounded-2xl shadow-xl z-50 overflow-hidden animate-fade-in origin-top-right">
+                  <div className="flex justify-between items-center p-4 border-b border-border bg-background">
+                    <h3 className="font-bold text-primary text-sm">Notificaties</h3>
+                    {unreadCount > 0 && (
+                      <button onClick={handleReadAllNotifications} className="text-[10px] font-semibold text-primary hover:text-primary-hover uppercase tracking-wide">
+                        Alles gelezen
+                      </button>
+                    )}
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="p-6 text-center text-muted text-xs">Je hebt geen notificaties.</div>
+                    ) : (
+                      notifications.map(n => (
+                        <div key={n.id} onClick={() => !n.is_read && handleReadNotification(n.id)} className={`p-4 border-b border-border last:border-b-0 cursor-pointer transition-colors hover:bg-background ${n.is_read ? 'opacity-60' : 'bg-primary/5 border-l-4 border-l-primary'}`}>
+                          <div className="flex justify-between items-start gap-2">
+                            <span className="text-xs font-medium text-primary">{n.message}</span>
+                            {!n.is_read && <span className="w-2 h-2 bg-primary rounded-full shrink-0 mt-1"></span>}
+                          </div>
+                          <div className="text-[10px] text-muted mt-1">{new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
  <button
  onClick={toggleDarkMode}
  className="w-8 h-8 rounded-xl flex items-center justify-center bg-surface hover:bg-surface-hover transition-colors text-muted"
