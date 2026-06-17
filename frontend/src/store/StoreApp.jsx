@@ -560,21 +560,28 @@ function StoreApp() {
  </svg>
  </button>
 
- {/* Product Image inside Modal Header */}
- {selectedProduct.image_url && (
- <div className="w-full h-36 overflow-hidden rounded-t-2xl -mt-6 -mx-6 mb-4 border-b border-border relative">
- <img src={`http://localhost:8000/uploads/${selectedProduct.image_url}`} alt={selectedProduct.name} className="w-full h-full object-cover" />
- </div>
- )}
+          {/* Product Image inside Modal Header */}
+          {selectedProduct.image_url && (
+            <div className="-mt-6 -mx-6 mb-4 h-48 bg-white/50 rounded-t-3xl border-b border-border overflow-hidden flex justify-center items-center relative">
+              <img src={`http://localhost:8000/uploads/${selectedProduct.image_url}`} alt={selectedProduct.name} className="w-full h-full object-contain p-4" />
+            </div>
+          )}
 
  {/* Modal Title */}
  <div className="mb-4">
  <span className="text-[10px] font-bold uppercase tracking-wider text-muted">
  {selectedProduct.category}
  </span>
- <h2 className="text-xl font-bold tracking-tight mt-0.5 text-primary">
+ <div className="flex items-center gap-2 mt-0.5">
+ <h2 className="text-xl font-bold tracking-tight text-primary">
  {selectedProduct.name}
  </h2>
+ {selectedProduct.is_18_plus && (
+ <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+ 18+
+ </span>
+ )}
+ </div>
  {selectedProduct.description && (
  <p className="text-xs text-muted mt-1">
  {selectedProduct.description}
@@ -668,15 +675,6 @@ function StoreApp() {
  className="w-full px-3 py-2 bg-background border border-border rounded-xl focus:bg-surface transition-all text-xs h-16 resize-none"
  />
  </div>
-
- {/* 18+ Age Info Notice */}
- {selectedProduct.is_18_plus && (
- <div className="bg-red-55/40 border border-danger-border p-2.5 rounded-2xl text-center">
- <span className="text-[10px] font-bold text-danger uppercase tracking-wider flex items-center justify-center gap-1.5">
- 🔞 18+ Product — Legitimitatie kan worden gevraagd
- </span>
- </div>
- )}
 
  {/* Place Order Button */}
  <button type="submit"
