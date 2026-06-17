@@ -1,6 +1,6 @@
 # Tappr 🍺
 
-Tappr is a modern, premium, and fully responsive **Event & Bar Ordering System** designed to streamline operations for bars, festivals, and private events. Built with React (Vite) and Express (Node.js), it offers a seamless ordering experience for guests and a powerful real-time admin control panel for organizers.
+Tappr is a **Event & Bar Ordering System** designed to streamline operations for bars, festivals, and private events. Built with React (Vite) and Express (Node.js), it offers a seamless ordering experience for guests and a powerful real-time admin control panel for organizers.
 
 ---
 
@@ -30,7 +30,7 @@ Tappr is a modern, premium, and fully responsive **Event & Bar Ordering System**
 - **Live Inventory Tab:** Interactive admin interface to quickly check, adjust, and add stock items.
 
 ### 🎨 Theme & Styling
-- **Premium Aesthetics:** Curated dark/light colors with seamless transition animations and premium glassmorphism accents.
+- **Simple & Straightforward Design:** Curated dark/light colors with seamless transition animations and premium glassmorphism accents.
 - **Responsive Layouts:** Tailored for mobile screens (guests ordering at the bar) and large desktop monitors (admins at the backend).
 
 ---
