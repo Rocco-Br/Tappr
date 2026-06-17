@@ -233,10 +233,12 @@ app.get('/api/products', (req, res) => {
         ...opt,
         choices: JSON.parse(opt.choices || '[]')
       }));
+      const ingredients = db.prepare("SELECT * FROM ProductIngredients WHERE product_id = ?").all(p.id);
       return {
         ...p,
         is_18_plus: !!p.is_18_plus,
-        options: parsedOptions
+        options: parsedOptions,
+        ingredients: ingredients
       };
     });
     res.json(enriched);
@@ -254,10 +256,12 @@ app.get('/api/admin/products', authenticate, requireAdmin, (req, res) => {
         ...opt,
         choices: JSON.parse(opt.choices || '[]')
       }));
+      const ingredients = db.prepare("SELECT * FROM ProductIngredients WHERE product_id = ?").all(p.id);
       return {
         ...p,
         is_18_plus: !!p.is_18_plus,
-        options: parsedOptions
+        options: parsedOptions,
+        ingredients: ingredients
       };
     });
     res.json(enriched);
@@ -288,6 +292,15 @@ app.post('/api/admin/products', authenticate, requireAdmin, (req, res) => {
           insertOpt.run(productId, opt.name, opt.type || 'select', JSON.stringify(opt.choices || []));
         }
       }
+      
+      const { is_composition, ingredients } = req.body;
+      if (is_composition && ingredients && Array.isArray(ingredients)) {
+        const insertIng = db.prepare("INSERT INTO ProductIngredients (product_id, ingredient_product_id, amount) VALUES (?, ?, ?)");
+        for (const ing of ingredients) {
+          insertIng.run(productId, parseInt(ing.ingredient_id, 10), parseInt(ing.amount, 10));
+        }
+      }
+
       return productId;
     });
 
@@ -315,6 +328,15 @@ app.put('/api/admin/products/:id', authenticate, requireAdmin, (req, res) => {
         const insertOpt = db.prepare("INSERT INTO ProductOptions (product_id, name, type, choices) VALUES (?, ?, ?, ?)");
         for (const opt of options) {
           insertOpt.run(productId, opt.name, opt.type || 'select', JSON.stringify(opt.choices || []));
+        }
+      }
+
+      const { is_composition, ingredients } = req.body;
+      db.prepare("DELETE FROM ProductIngredients WHERE product_id = ?").run(productId);
+      if (is_composition && ingredients && Array.isArray(ingredients)) {
+        const insertIng = db.prepare("INSERT INTO ProductIngredients (product_id, ingredient_product_id, amount) VALUES (?, ?, ?)");
+        for (const ing of ingredients) {
+          insertIng.run(productId, parseInt(ing.ingredient_id, 10), parseInt(ing.amount, 10));
         }
       }
     });
