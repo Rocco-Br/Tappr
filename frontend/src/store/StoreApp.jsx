@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import StoreLogin from './StoreLogin';
 
@@ -8,6 +8,19 @@ function StoreApp() {
   const [isValidUser, setIsValidUser] = useState(false);
   const [username, setUsername] = useState('');
   const [is18Plus, setIs18Plus] = useState(false);
+  const [isDark, setIsDark] = useState(document.documentElement.classList.contains('dark'));
+
+  const toggleDarkMode = () => {
+    const nextIsDark = !isDark;
+    setIsDark(nextIsDark);
+    if (nextIsDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  };
   
   const [activeEvent, setActiveEvent] = useState(null);
   const [products, setProducts] = useState([]);
@@ -21,7 +34,6 @@ function StoreApp() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedOptions, setSelectedOptions] = useState({});
   const [remark, setRemark] = useState('');
-  const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [ordering, setOrdering] = useState(false);
 
   // Tutorial states
@@ -30,65 +42,6 @@ function StoreApp() {
 
   // Cooldown State (Anti-spam 30s)
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
-
-  // Check login token
-  useEffect(() => {
-    if (token) {
-      axios.get('http://localhost:8000/api/auth/me', {
-        headers: { Authorization: `Bearer ${token}` }
-      }).then(res => {
-        setIsValidUser(true);
-        setUsername(res.data.username);
-        setIs18Plus(!!res.data.is_18_plus);
-        
-        // Show tutorial if first time
-        const completed = localStorage.getItem('tutorialCompleted');
-        if (!completed) {
-          setShowTutorial(true);
-        }
-      }).catch(() => {
-        localStorage.removeItem('storeToken');
-        setToken(null);
-      }).finally(() => {
-        setIsChecking(false);
-      });
-    } else {
-      setIsChecking(false);
-    }
-  }, [token]);
-
-  // Load shop data
-  useEffect(() => {
-    if (isValidUser) {
-      fetchEventAndProducts();
-      fetchOrders();
-
-      // Poll orders and active event status (for live announcements) every 5 seconds
-      const interval = setInterval(() => {
-        fetchEventAndProducts();
-        fetchOrders();
-      }, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [isValidUser, token]);
-
-  // Cooldown countdown timer effect
-  useEffect(() => {
-    const checkCooldown = () => {
-      const lastOrderTime = localStorage.getItem('lastOrderTime');
-      if (lastOrderTime) {
-        const elapsedMs = Date.now() - Number(lastOrderTime);
-        const remainingSecs = Math.max(0, Math.ceil((30000 - elapsedMs) / 1000));
-        setCooldownRemaining(remainingSecs);
-      } else {
-        setCooldownRemaining(0);
-      }
-    };
-
-    checkCooldown();
-    const interval = setInterval(checkCooldown, 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   const fetchEventAndProducts = async () => {
     try {
@@ -118,6 +71,78 @@ function StoreApp() {
     }
   };
 
+  // Check login token
+  useEffect(() => {
+    let active = true;
+    if (token) {
+      axios.get('http://localhost:8000/api/auth/me', {
+        headers: { Authorization: `Bearer ${token}` }
+      }).then(res => {
+        if (!active) return;
+        setIsValidUser(true);
+        setUsername(res.data.username);
+        setIs18Plus(!!res.data.is_18_plus);
+        
+        // Show tutorial if first time
+        const completed = localStorage.getItem('tutorialCompleted');
+        if (!completed) {
+          setShowTutorial(true);
+        }
+      }).catch(() => {
+        if (!active) return;
+        localStorage.removeItem('storeToken');
+        setToken(null);
+      }).finally(() => {
+        if (!active) return;
+        setTimeout(() => setIsChecking(false), 0);
+      });
+    } else {
+      setTimeout(() => setIsChecking(false), 0);
+    }
+    return () => { active = false; };
+  }, [token]);
+
+  // Load shop data
+  useEffect(() => {
+    if (isValidUser) {
+      const timer = setTimeout(() => {
+        fetchEventAndProducts();
+        fetchOrders();
+      }, 0);
+
+      // Poll orders and active event status (for live announcements) every 5 seconds
+      const interval = setInterval(() => {
+        fetchEventAndProducts();
+        fetchOrders();
+      }, 5000);
+      return () => {
+        clearTimeout(timer);
+        clearInterval(interval);
+      };
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isValidUser, token]);
+
+  // Cooldown countdown timer effect
+  useEffect(() => {
+    const checkCooldown = () => {
+      const lastOrderTime = localStorage.getItem('lastOrderTime');
+      if (lastOrderTime) {
+        const elapsedMs = Date.now() - Number(lastOrderTime);
+        const remainingSecs = Math.max(0, Math.ceil((30000 - elapsedMs) / 1000));
+        setCooldownRemaining(remainingSecs);
+      } else {
+        setCooldownRemaining(0);
+      }
+    };
+
+    checkCooldown();
+    const interval = setInterval(checkCooldown, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+
+
   const handleLogout = () => {
     localStorage.removeItem('storeToken');
     setToken(null);
@@ -138,7 +163,6 @@ function StoreApp() {
     
     setSelectedProduct(product);
     setRemark('');
-    setAgeConfirmed(false);
     
     // Initialize options with first choices
     const initialOptions = {};
@@ -243,7 +267,7 @@ function StoreApp() {
     <div className="min-h-screen bg-background text-zinc-950 dark:text-zinc-50 flex flex-col transition-colors duration-200">
       
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md border-b border-border px-4 py-3 flex justify-between items-center transition-colors">
+      <header className="sticky top-0 z-40 bg-surface/95 backdrop-blur-md border-b border-border px-4 py-3 flex justify-between items-center transition-colors">
         <div className="flex flex-col">
           <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
             {activeEvent ? activeEvent.name : 'Bestelsysteem'}
@@ -253,6 +277,22 @@ function StoreApp() {
           </span>
         </div>
         <div className="flex items-center gap-2">
+          {/* Theme Toggle Button */}
+          <button
+            onClick={toggleDarkMode}
+            className="w-8 h-8 rounded-xl flex items-center justify-center bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors text-zinc-500 dark:text-zinc-400"
+            title={isDark ? "Lichte modus" : "Donkere modus"}
+          >
+            {isDark ? (
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="currentColor" className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m0 13.5V21M5.197 5.197l1.591 1.591M17.213 17.213l1.591 1.591M3 12h2.25m13.5 0H21M5.197 18.803l1.591-1.591M17.213 6.787l1.591-1.591M12 7.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Z" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="currentColor" className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+              </svg>
+            )}
+          </button>
           {/* Restart Tutorial Icon */}
           <button 
             onClick={() => { setShowTutorial(true); setTutorialStep(1); }} 
@@ -315,7 +355,7 @@ function StoreApp() {
                 placeholder="Zoeken naar drankjes, snacks..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm text-sm focus:border-zinc-900 dark:focus:border-white focus:ring-1 focus:ring-zinc-950 transition-all placeholder:text-zinc-400"
+                className="w-full pl-10 pr-4 py-3 bg-surface/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm text-sm focus:border-zinc-900 dark:focus:border-white focus:ring-1 focus:ring-zinc-950 transition-all placeholder:text-zinc-400"
               />
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="currentColor" className="absolute left-3.5 top-3.5 w-4 h-4 text-zinc-400">
                 <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.602 10.602Z" />
@@ -341,7 +381,7 @@ function StoreApp() {
                   className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap border transition-all duration-200 ${
                     selectedCategory === cat 
                       ? 'bg-black text-white dark:bg-white dark:text-black border-transparent shadow-sm'
-                      : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50'
+                      : 'bg-surface border-border text-zinc-600 dark:text-zinc-400 hover:bg-background'
                   }`}
                 >
                   {cat}
@@ -436,7 +476,7 @@ function StoreApp() {
 
       {/* Persistent Order History Overlay / Drawer at Bottom */}
       {isValidUser && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-zinc-950/95 border-t border-border z-30 shadow-2xl backdrop-blur-md max-w-xl mx-auto px-4 py-3.5 transition-colors">
+        <div className="fixed bottom-0 left-0 right-0 bg-surface/95 border-t border-border z-30 shadow-2xl backdrop-blur-md max-w-xl mx-auto px-4 py-3.5 transition-colors">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-bold tracking-tight flex items-center gap-1.5">
               <span className="inline-block w-2 h-2 bg-black dark:bg-white rounded-full"></span>
@@ -463,7 +503,7 @@ function StoreApp() {
                           {item.product_name}
                           {Object.keys(item.selected_options || {}).length > 0 && (
                             <span className="font-medium text-zinc-500 dark:text-zinc-400 text-[10px] ml-1.5">
-                              ({Object.entries(item.selected_options).map(([k, v]) => `${v}`).join(', ')})
+                              ({Object.values(item.selected_options).join(', ')})
                             </span>
                           )}
                         </div>
@@ -634,7 +674,7 @@ function StoreApp() {
                   placeholder="Bijv. Extra ijs, Geen ketchup..."
                   value={remark}
                   onChange={e => setRemark(e.target.value)}
-                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:bg-white dark:focus:bg-zinc-900 transition-all text-xs h-16 resize-none"
+                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:bg-surface dark:focus:bg-zinc-900 transition-all text-xs h-16 resize-none"
                 />
               </div>
 
