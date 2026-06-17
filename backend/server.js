@@ -495,6 +495,118 @@ app.post('/api/admin/orders/:id/complete', authenticate, requireAdmin, (req, res
   }
 });
 
+// --- Routes: Age Verification ---
+
+// Get current user's request
+app.get('/api/store/age-verification', authenticate, (req, res) => {
+  try {
+    const request = db.prepare("SELECT * FROM AgeVerificationRequests WHERE user_id = ? ORDER BY created_at DESC LIMIT 1").get(req.user.id);
+    res.json({ request: request || null });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Fout bij ophalen leeftijdsverificatie.' });
+  }
+});
+
+// Submit a new request
+app.post('/api/store/age-verification', authenticate, (req, res) => {
+  try {
+    const existing = db.prepare("SELECT * FROM AgeVerificationRequests WHERE user_id = ? AND status = 'PENDING'").get(req.user.id);
+    if (existing) {
+      return res.status(400).json({ error: 'Je hebt al een openstaand verzoek.' });
+    }
+    
+    // Create new request
+    db.prepare("INSERT INTO AgeVerificationRequests (user_id, status) VALUES (?, 'PENDING')").run(req.user.id);
+    
+    // Create a notification for the admin
+    db.prepare("INSERT INTO Notifications (message, type) VALUES (?, 'AGE_VERIFICATION')").run(`Nieuw 18+ verzoek binnengekomen van ${req.user.username}`);
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Fout bij aanvragen verificatie.' });
+  }
+});
+
+// Admin: Get all requests
+app.get('/api/admin/age-verifications', authenticate, requireAdmin, (req, res) => {
+  try {
+    const requests = db.prepare(`
+      SELECT a.*, u.username 
+      FROM AgeVerificationRequests a 
+      JOIN Users u ON a.user_id = u.id 
+      ORDER BY 
+        CASE WHEN a.status = 'PENDING' THEN 0 ELSE 1 END,
+        a.created_at DESC
+    `).all();
+    res.json(requests);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Fout bij ophalen verzoeken.' });
+  }
+});
+
+// Admin: Resolve a request
+app.post('/api/admin/age-verifications/:id/resolve', authenticate, requireAdmin, (req, res) => {
+  const { status } = req.body; // 'APPROVED' or 'REJECTED'
+  const requestId = req.params.id;
+  
+  if (!['APPROVED', 'REJECTED'].includes(status)) {
+    return res.status(400).json({ error: 'Ongeldige status.' });
+  }
+
+  try {
+    const request = db.prepare("SELECT * FROM AgeVerificationRequests WHERE id = ?").get(requestId);
+    if (!request) return res.status(404).json({ error: 'Verzoek niet gevonden.' });
+
+    db.prepare("UPDATE AgeVerificationRequests SET status = ?, resolved_at = CURRENT_TIMESTAMP WHERE id = ?").run(status, requestId);
+    
+    if (status === 'APPROVED') {
+      db.prepare("UPDATE Users SET is_18_plus = 1 WHERE id = ?").run(request.user_id);
+    } else if (status === 'REJECTED') {
+      db.prepare("UPDATE Users SET is_18_plus = 0 WHERE id = ?").run(request.user_id);
+    }
+    
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Fout bij afhandelen verzoek.' });
+  }
+});
+
+// --- Routes: Notifications ---
+
+app.get('/api/admin/notifications', authenticate, requireAdmin, (req, res) => {
+  try {
+    const notifications = db.prepare("SELECT * FROM Notifications ORDER BY created_at DESC LIMIT 50").all();
+    res.json(notifications);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Fout bij ophalen notificaties.' });
+  }
+});
+
+app.post('/api/admin/notifications/:id/read', authenticate, requireAdmin, (req, res) => {
+  try {
+    db.prepare("UPDATE Notifications SET is_read = 1 WHERE id = ?").run(req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Fout bij markeren als gelezen.' });
+  }
+});
+
+app.post('/api/admin/notifications/read-all', authenticate, requireAdmin, (req, res) => {
+  try {
+    db.prepare("UPDATE Notifications SET is_read = 1 WHERE is_read = 0").run();
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Fout bij markeren van alle notificaties.' });
+  }
+});
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server draait op poort ${PORT} en luistert naar alle netwerkinterfaces.`);
 });

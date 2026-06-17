@@ -61,6 +61,23 @@ db.exec(`
     FOREIGN KEY(order_id) REFERENCES Orders(id) ON DELETE CASCADE,
     FOREIGN KEY(product_id) REFERENCES Products(id)
   );
+
+  CREATE TABLE IF NOT EXISTS AgeVerificationRequests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL UNIQUE,
+    status TEXT CHECK( status IN ('PENDING', 'APPROVED', 'REJECTED') ) NOT NULL DEFAULT 'PENDING',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    resolved_at DATETIME,
+    FOREIGN KEY(user_id) REFERENCES Users(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS Notifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    message TEXT NOT NULL,
+    type TEXT NOT NULL,
+    is_read INTEGER NOT NULL DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
 `);
 
 // Enable foreign keys

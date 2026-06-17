@@ -6,13 +6,13 @@ import App from './App.jsx'
 // Initialize theme immediately to prevent flashing
 const storedTheme = localStorage.getItem('theme');
 if (storedTheme === 'dark' || (!storedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-  document.documentElement.classList.add('dark');
+ document.documentElement.classList.add('dark');
 } else {
-  document.documentElement.classList.remove('dark');
+ document.documentElement.classList.remove('dark');
 }
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
+ <StrictMode>
+ <App />
+ </StrictMode>,
 )
