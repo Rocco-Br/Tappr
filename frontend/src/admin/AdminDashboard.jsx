@@ -5,6 +5,7 @@ import AdminEvents from './AdminEvents';
 import AdminProducts from './AdminProducts';
 import AdminUsers from './AdminUsers';
 import AdminAgeVerifications from './AdminAgeVerifications';
+import AdminInventory from './AdminInventory';
 
 function AdminDashboard({ token, setToken }) {
  const [activeTab, setActiveTab] = useState('dashboard');
@@ -91,6 +92,7 @@ function AdminDashboard({ token, setToken }) {
  { id: 'dashboard', label: 'Live Bestellingen' },
  { id: 'events', label: 'Evenementen' },
  { id: 'products', label: 'Producten' },
+ { id: 'inventory', label: 'Voorraad' },
  { id: 'users', label: 'Gasten' },
  { id: 'age-verification', label: '18+ Verzoeken' },
  ];
@@ -220,6 +222,7 @@ function AdminDashboard({ token, setToken }) {
  <AdminEvents token={token} activeEvent={activeEvent} fetchActiveEvent={fetchActiveEvent} />
  )}
  {activeTab === 'products' && <AdminProducts token={token} />}
+ {activeTab === 'inventory' && <AdminInventory token={token} />}
  {activeTab === 'users' && <AdminUsers token={token} />}
  {activeTab === 'age-verification' && <AdminAgeVerifications token={token} />}
  </main>

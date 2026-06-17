@@ -327,6 +327,21 @@ app.put('/api/admin/products/:id', authenticate, requireAdmin, (req, res) => {
   }
 });
 
+app.put('/api/admin/products/:id/stock', authenticate, requireAdmin, (req, res) => {
+  const { stock_amount, stock_unit } = req.body;
+  const productId = req.params.id;
+  try {
+    const amount = stock_amount === '' || stock_amount === null ? null : parseInt(stock_amount, 10);
+    db.prepare("UPDATE Products SET stock_amount=?, stock_unit=? WHERE id=?").run(
+      amount, stock_unit || 'stuks', productId
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Voorraad wijzigen mislukt.' });
+  }
+});
+
 // --- Routes: Orders (Guest & Admin) ---
 app.post('/api/orders', authenticate, (req, res) => {
   const activeEvent = db.prepare("SELECT * FROM Events WHERE status = 'ACTIVE'").get();
