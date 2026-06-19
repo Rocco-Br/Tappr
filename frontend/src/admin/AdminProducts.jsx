@@ -414,139 +414,141 @@ function AdminProducts({ token }) {
  /* GRID VIEW */
  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
  {filteredProducts.map(p => (
- <div key={p.id} className="group bg-surface border border-border rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between overflow-hidden">
- <div>
- {/* Image & status badges container */}
- <div className="h-44 overflow-hidden relative bg-white dark:bg-white/5 border-b border-border-subtle flex items-center justify-center">
- {p.image_url ? (
- <img src={`${import.meta.env.VITE_API_URL}/uploads/${p.image_url}`} alt={p.name}
- className="max-w-full max-h-full object-contain p-2 group-hover:scale-102 transition-transform duration-300"
- />
- ) : (
- <div className="w-full h-full flex flex-col items-center justify-center text-secondary">
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-12 h-12">
- <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
- </svg>
- <span className="text-[10px] uppercase font-bold tracking-wider mt-1.5 font-mono">Geen Foto</span>
- </div>
- )}
+  <div key={p.id} className="group bg-surface border border-border rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between">
+   <div>
+    {/* Image & status badges container */}
+    <div className="h-44 overflow-hidden relative bg-zinc-50 dark:bg-white/5 border-b border-border rounded-t-2xl flex items-center justify-center">
+     {p.image_url ? (
+      <img src={`${import.meta.env.VITE_API_URL}/uploads/${p.image_url}`} alt={p.name}
+       className="max-w-full max-h-full object-contain p-2 group-hover:scale-102 transition-transform duration-300"
+      />
+     ) : (
+      <div className="w-full h-full flex flex-col items-center justify-center text-secondary">
+       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-12 h-12">
+        <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+       </svg>
+       <span className="text-[10px] uppercase font-bold tracking-wider mt-1.5 font-mono">Geen Foto</span>
+      </div>
+     )}
 
- {/* Status Badges */}
- <div className="absolute top-3 left-3 flex gap-1.5 z-10">
- <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border ${
- p.status === 'AVAILABLE'
- ? 'bg-green-50 text-green-700 border-success-border shadow-sm'
- : 'bg-red-50 text-red-750 border-danger-border'
- }`}>
- {p.status === 'AVAILABLE' ? 'Beschikbaar' : 'Uitverkocht'}
- </span>
- </div>
+     {/* Status Badges */}
+     <div className="absolute top-3 left-3 flex gap-1.5 z-10">
+      <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border ${
+       p.status === 'AVAILABLE'
+        ? 'bg-green-50 text-green-700 border-success-border shadow-sm'
+        : 'bg-red-50 text-red-750 border-danger-border'
+      }`}>
+       {p.status === 'AVAILABLE' ? 'Beschikbaar' : 'Uitverkocht'}
+      </span>
+     </div>
 
- {/* Age restriction badge */}
- {p.is_18_plus && (
- <div className="absolute top-3 right-3 z-10">
- <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-extrabold bg-red-100 text-red-700 border border-danger-border shadow-sm">
- 18+
- </span>
- </div>
- )}
- {p.is_ingredient_only && (
- <div className={`absolute top-3 ${p.is_18_plus ? 'right-12' : 'right-3'} z-10`}>
- <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-extrabold bg-blue-100 text-blue-700 border border-blue-200 shadow-sm">
- Ingrediënt
- </span>
- </div>
- )}
- </div>
+     {/* Age restriction badge */}
+     {p.is_18_plus && (
+      <div className="absolute top-3 right-3 z-10">
+       <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-extrabold bg-red-100 text-red-700 border border-danger-border shadow-sm">
+        18+
+       </span>
+      </div>
+     )}
+     {p.is_ingredient_only && (
+      <div className={`absolute top-3 ${p.is_18_plus ? 'right-12' : 'right-3'} z-10`}>
+       <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-extrabold bg-blue-100 text-blue-700 border border-blue-200 shadow-sm">
+        Ingrediënt
+       </span>
+      </div>
+     )}
+    </div>
 
- {/* Card Body */}
- <div className="p-4 space-y-2">
- <span className="text-[9px] font-bold uppercase tracking-wider text-muted block">
- {p.category}
- </span>
- <div>
- <h3 className="font-bold text-base text-primary leading-snug">{p.name}</h3>
- {p.description && (
- <p className="text-xs text-muted mt-1 line-clamp-2">{p.description}</p>
- )}
- </div>
+    {/* Card Body */}
+    <div className="p-4 space-y-2">
+     <span className="text-[9px] font-bold uppercase tracking-wider text-muted block">
+      {p.category}
+     </span>
+     <div>
+      <h3 className="font-bold text-base text-primary leading-snug">{p.name}</h3>
+      {p.description && (
+       <p className="text-xs text-muted mt-1 line-clamp-2">{p.description}</p>
+      )}
+     </div>
 
- {/* Custom Fields Tags */}
- {p.options && p.options.length > 0 && (
- <div className="pt-2.5 border-t border-border-subtle flex flex-wrap gap-1.5">
- {p.options.map(opt => {
- let badgeStyle;
- if (opt.type === 'string') {
- badgeStyle = 'bg-background text-zinc-650 border-border';
- } else if (opt.type === 'toggle') {
- badgeStyle = 'bg-blue-50/40 text-blue-600 border-blue-100/30 ';
- } else {
- badgeStyle = 'bg-indigo-50/40 text-indigo-600 border-indigo-100/30 ';
- }
- return (
- <div key={opt.id} className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-semibold border ${badgeStyle}`}
- title={`${opt.type.toUpperCase()}: ${opt.name}`}
- >
- <span className="font-bold">{opt.name}</span>
- <span className="opacity-40 font-normal">|</span>
- <span className="opacity-80">
- {opt.type === 'string' ? opt.choices[0] : `${opt.choices.length} opties`}
- </span>
- </div>
- );
- })}
- </div>
- )}
- </div>
- </div>
+     {/* Custom Fields Tags */}
+     {p.options && p.options.length > 0 && (
+      <div className="pt-2.5 border-t border-border-subtle flex flex-wrap gap-1.5">
+       {p.options.map(opt => {
+        let badgeStyle;
+        if (opt.type === 'string') {
+         badgeStyle = 'bg-background text-zinc-650 border-border';
+        } else if (opt.type === 'toggle') {
+         badgeStyle = 'bg-blue-50/40 text-blue-600 border-blue-100/30 ';
+        } else {
+         badgeStyle = 'bg-indigo-50/40 text-indigo-600 border-indigo-100/30 ';
+        }
+        return (
+         <div key={opt.id} className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-semibold border ${badgeStyle}`}
+          title={`${opt.type.toUpperCase()}: ${opt.name}`}
+         >
+          <span className="font-bold">{opt.name}</span>
+          <span className="opacity-40 font-normal">|</span>
+          <span className="opacity-80">
+           {opt.type === 'string' ? opt.choices[0] : `${opt.choices.length} opties`}
+          </span>
+         </div>
+        );
+       })}
+      </div>
+     )}
+    </div>
+   </div>
 
- {/* Action Buttons */}
- <div className="px-4 pb-4 pt-2 border-t border-zinc-50 flex gap-2">
- <button
- onClick={() => handleEdit(p)}
- className="flex-1 text-center font-semibold text-xs text-secondary bg-surface hover:bg-surface-hover border border-border py-2 rounded-xl transition-all shadow-sm"
- >
- Bewerken
- </button>
- <button
- onClick={() => toggleStatus(p)}
- className={`flex-1 text-center font-bold text-xs py-2 rounded-xl border transition-all ${
- p.status === 'AVAILABLE'
- ? 'bg-surface text-secondary hover:bg-background border-border shadow-sm'
- : 'bg-primary text-primary-text hover:bg-primary-hover border-transparent shadow-md'
- }`}
- >
- {p.status === 'AVAILABLE' ? 'Zet op Op' : 'Zet op Beschikbaar'}
- </button>
- {deleteConfirmId === p.id ? (
- <div className="flex gap-1">
- <button
- onClick={() => handleDelete(p.id)}
- className="text-xs font-bold px-2 py-2 rounded-xl bg-red-600 text-white hover:bg-red-700 transition-all shadow-sm whitespace-nowrap"
- >
- Zeker?
- </button>
- <button
- onClick={() => setDeleteConfirmId(null)}
- className="text-xs font-semibold px-2 py-2 rounded-xl bg-surface border border-border text-secondary hover:bg-surface-hover transition-all"
- >
- ✕
- </button>
- </div>
- ) : (
- <button
- onClick={() => setDeleteConfirmId(p.id)}
- className="flex items-center gap-1 text-xs font-bold px-3 py-2 rounded-xl bg-red-600 text-white hover:bg-red-700 transition-all shadow-sm"
- title="Product verwijderen"
- >
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5 shrink-0">
- <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.34 9m-4.72 0-.34-9m4.72-3.415V9c0 .415-.335.75-.75.75H9.75a.75.75 0 0 1-.75-.75V5.585c0-.415.335-.75.75-.75h4.5a.75.75 0 0 1 .75.75ZM3.172 5.585C3.393 4.195 4.57 3 6 3h12c1.43 0 2.607 1.195 2.828 2.585M4.5 9v11.25A2.25 2.25 0 0 0 6.75 22.5h10.5a2.25 2.25 0 0 0 2.25-2.25V9" />
- </svg>
- </button>
- )}
- </div>
- </div>
- ))}
+   {/* Action Buttons */}
+   <div className="px-4 pb-4 pt-3 border-t border-border space-y-2">
+    <div className="flex gap-2">
+     <button
+      onClick={() => handleEdit(p)}
+      className="flex-1 text-center font-semibold text-xs text-secondary bg-surface hover:bg-surface-hover border border-border py-2 rounded-xl transition-all shadow-sm"
+     >
+      Bewerken
+     </button>
+     <button
+      onClick={() => toggleStatus(p)}
+      className={`flex-1 text-center font-bold text-xs py-2 rounded-xl border transition-all ${
+       p.status === 'AVAILABLE'
+        ? 'bg-surface text-secondary hover:bg-background border-border shadow-sm'
+        : 'bg-primary text-primary-text hover:bg-primary-hover border-transparent shadow-md'
+      }`}
+     >
+      {p.status === 'AVAILABLE' ? 'Zet op Op' : 'Zet op Beschikbaar'}
+     </button>
+    </div>
+    {deleteConfirmId === p.id ? (
+     <div className="flex gap-2">
+      <button
+       onClick={() => handleDelete(p.id)}
+       className="flex-1 text-xs font-bold py-2 rounded-xl bg-red-600 text-white hover:bg-red-700 transition-all shadow-sm"
+      >
+       ⚠️ Ja, verwijder dit product
+      </button>
+      <button
+       onClick={() => setDeleteConfirmId(null)}
+       className="text-xs font-semibold px-4 py-2 rounded-xl bg-surface border border-border text-secondary hover:bg-surface-hover transition-all"
+      >
+       Annuleer
+      </button>
+     </div>
+    ) : (
+     <button
+      onClick={() => setDeleteConfirmId(p.id)}
+      className="w-full flex items-center justify-center gap-2 text-xs font-bold py-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 transition-all"
+     >
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5">
+       <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.34 9m-4.72 0-.34-9m4.72-3.415V9c0 .415-.335.75-.75.75H9.75a.75.75 0 0 1-.75-.75V5.585c0-.415.335-.75.75-.75h4.5a.75.75 0 0 1 .75.75ZM3.172 5.585C3.393 4.195 4.57 3 6 3h12c1.43 0 2.607 1.195 2.828 2.585M4.5 9v11.25A2.25 2.25 0 0 0 6.75 22.5h10.5a2.25 2.25 0 0 0 2.25-2.25V9" />
+      </svg>
+      Verwijderen
+     </button>
+    )}
+   </div>
+  </div>
+  ))}
  </div>
  ) : (
  /* LIST VIEW (TABLE) */
