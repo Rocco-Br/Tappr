@@ -369,6 +369,19 @@ app.put('/api/admin/products/:id', authenticate, requireAdmin, (req, res) => {
   }
 });
 
+app.delete('/api/admin/products/:id', authenticate, requireAdmin, (req, res) => {
+  const productId = req.params.id;
+  try {
+    const product = db.prepare('SELECT * FROM Products WHERE id = ?').get(productId);
+    if (!product) return res.status(404).json({ error: 'Product niet gevonden.' });
+    db.prepare('DELETE FROM Products WHERE id = ?').run(productId);
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Product verwijderen mislukt.' });
+  }
+});
+
 app.put('/api/admin/products/:id/stock', authenticate, requireAdmin, (req, res) => {
   const { stock_amount, stock_unit } = req.body;
   const productId = req.params.id;

@@ -27,6 +27,7 @@ function AdminProducts({ token }) {
  const [searchQuery, setSearchQuery] = useState('');
  const [selectedCategory, setSelectedCategory] = useState('Alle');
  const [dragOver, setDragOver] = useState(false);
+ const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
  const fetchProducts = async () => {
  try {
@@ -221,6 +222,19 @@ function AdminProducts({ token }) {
  console.error(err);
  }
  };
+
+  const handleDelete = async (productId) => {
+    try {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/admin/products/${productId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setDeleteConfirmId(null);
+      fetchProducts();
+    } catch (err) {
+      console.error(err);
+      alert('Product verwijderen mislukt.');
+    }
+  };
 
  // Option Helper Functions
  const handleAddOption = () => {
@@ -504,6 +518,32 @@ function AdminProducts({ token }) {
  >
  {p.status === 'AVAILABLE' ? 'Zet op Op' : 'Zet op Beschikbaar'}
  </button>
+ {deleteConfirmId === p.id ? (
+ <div className="flex gap-1">
+ <button
+ onClick={() => handleDelete(p.id)}
+ className="text-xs font-bold px-2 py-2 rounded-xl bg-red-600 text-white hover:bg-red-700 border-transparent transition-all shadow-sm whitespace-nowrap"
+ >
+ Zeker?
+ </button>
+ <button
+ onClick={() => setDeleteConfirmId(null)}
+ className="text-xs font-semibold px-2 py-2 rounded-xl bg-surface border border-border text-secondary hover:bg-surface-hover transition-all"
+ >
+ ✕
+ </button>
+ </div>
+ ) : (
+ <button
+ onClick={() => setDeleteConfirmId(p.id)}
+ className="text-xs font-bold px-3 py-2 rounded-xl bg-danger-bg text-red-600 hover:bg-red-100 border border-danger-border transition-all shadow-sm"
+ title="Product verwijderen"
+ >
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5">
+ <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.34 9m-4.72 0-.34-9m4.72-3.415V9c0 .415-.335.75-.75.75H9.75a.75.75 0 0 1-.75-.75V5.585c0-.415.335-.75.75-.75h4.5a.75.75 0 0 1 .75.75ZM3.172 5.585C3.393 4.195 4.57 3 6 3h12c1.43 0 2.607 1.195 2.828 2.585M4.5 9v11.25A2.25 2.25 0 0 0 6.75 22.5h10.5a2.25 2.25 0 0 0 2.25-2.25V9" />
+ </svg>
+ </button>
+ )}
  </div>
  </div>
  ))}
@@ -622,6 +662,29 @@ function AdminProducts({ token }) {
  >
  Zet op {p.status === 'AVAILABLE' ? 'Op' : 'Beschikbaar'}
  </button>
+ {deleteConfirmId === p.id ? (
+ <>
+ <button
+ onClick={() => handleDelete(p.id)}
+ className="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-all"
+ >
+ Zeker?
+ </button>
+ <button
+ onClick={() => setDeleteConfirmId(null)}
+ className="text-xs font-semibold px-2 py-1.5 rounded-lg border border-border text-secondary hover:bg-surface-hover transition-all"
+ >
+ ✕
+ </button>
+ </>
+ ) : (
+ <button
+ onClick={() => setDeleteConfirmId(p.id)}
+ className="text-xs font-bold px-3 py-1.5 rounded-lg bg-danger-bg text-red-600 hover:bg-red-100 border border-danger-border transition-all"
+ >
+ Verwijderen
+ </button>
+ )}
  </td>
  </tr>
  ))}
