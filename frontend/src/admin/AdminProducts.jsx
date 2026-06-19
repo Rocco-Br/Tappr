@@ -522,7 +522,7 @@ function AdminProducts({ token }) {
  <div className="flex gap-1">
  <button
  onClick={() => handleDelete(p.id)}
- className="text-xs font-bold px-2 py-2 rounded-xl bg-red-600 text-white hover:bg-red-700 border-transparent transition-all shadow-sm whitespace-nowrap"
+ className="text-xs font-bold px-2 py-2 rounded-xl bg-red-600 text-white hover:bg-red-700 transition-all shadow-sm whitespace-nowrap"
  >
  Zeker?
  </button>
@@ -536,10 +536,10 @@ function AdminProducts({ token }) {
  ) : (
  <button
  onClick={() => setDeleteConfirmId(p.id)}
- className="text-xs font-bold px-3 py-2 rounded-xl bg-danger-bg text-red-600 hover:bg-red-100 border border-danger-border transition-all shadow-sm"
+ className="flex items-center gap-1 text-xs font-bold px-3 py-2 rounded-xl bg-red-600 text-white hover:bg-red-700 transition-all shadow-sm"
  title="Product verwijderen"
  >
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5">
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5 shrink-0">
  <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.34 9m-4.72 0-.34-9m4.72-3.415V9c0 .415-.335.75-.75.75H9.75a.75.75 0 0 1-.75-.75V5.585c0-.415.335-.75.75-.75h4.5a.75.75 0 0 1 .75.75ZM3.172 5.585C3.393 4.195 4.57 3 6 3h12c1.43 0 2.607 1.195 2.828 2.585M4.5 9v11.25A2.25 2.25 0 0 0 6.75 22.5h10.5a2.25 2.25 0 0 0 2.25-2.25V9" />
  </svg>
  </button>
