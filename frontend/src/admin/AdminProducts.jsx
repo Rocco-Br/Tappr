@@ -103,6 +103,7 @@ function AdminProducts({ token }) {
  description: product.description || '',
  category: product.category,
  is_18_plus: product.is_18_plus,
+ is_ingredient_only: !!product.is_ingredient_only,
  status: product.status,
  image_url: product.image_url || '',
  options: product.options ? product.options.map(opt => ({
@@ -123,6 +124,7 @@ function AdminProducts({ token }) {
  description: '',
  category: '',
  is_18_plus: false,
+ is_ingredient_only: false,
  status: 'AVAILABLE',
  image_url: '',
  options: [],
@@ -140,6 +142,7 @@ function AdminProducts({ token }) {
  description: '',
  category: '',
  is_18_plus: false,
+ is_ingredient_only: false,
  status: 'AVAILABLE',
  image_url: '',
  options: [],
@@ -179,6 +182,7 @@ function AdminProducts({ token }) {
  description: formData.description,
  category: formData.category,
  is_18_plus: formData.is_18_plus,
+ is_ingredient_only: formData.is_ingredient_only,
  status: formData.status,
  image_url: formData.image_url,
  options: optionsArray,
@@ -432,6 +436,13 @@ function AdminProducts({ token }) {
  </span>
  </div>
  )}
+ {p.is_ingredient_only && (
+ <div className={`absolute top-3 ${p.is_18_plus ? 'right-12' : 'right-3'} z-10`}>
+ <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-extrabold bg-blue-100 text-blue-700 border border-blue-200 shadow-sm">
+ Ingrediënt
+ </span>
+ </div>
+ )}
  </div>
 
  {/* Card Body */}
@@ -507,7 +518,7 @@ function AdminProducts({ token }) {
  <th className="px-6 py-4">Product</th>
  <th className="px-6 py-4">Categorie</th>
  <th className="px-6 py-4">Custom Velden</th>
- <th className="px-6 py-4">18+</th>
+ <th className="px-6 py-4">Kenmerken</th>
  <th className="px-6 py-4">Status</th>
  <th className="px-6 py-4 text-right">Acties</th>
  </tr>
@@ -572,10 +583,16 @@ function AdminProducts({ token }) {
  </td>
  <td className="px-6 py-4">
  {p.is_18_plus ? (
- <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-bold bg-red-100 text-red-750 border border-danger-border">
+ <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-bold bg-red-100 text-red-750 border border-danger-border mr-2">
  18+
  </span>
- ) : (
+ ) : null}
+ {p.is_ingredient_only ? (
+ <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-bold bg-blue-100 text-blue-750 border border-blue-200">
+ Ingrediënt
+ </span>
+ ) : null}
+ {!p.is_18_plus && !p.is_ingredient_only && (
  <span className="text-xs text-zinc-405">-</span>
  )}
  </td>
@@ -805,6 +822,16 @@ function AdminProducts({ token }) {
  🔞 18+ Product (Leeftijdscontrole verplicht)
  </label>
  </div>
+
+ {/* Ingredient Only Checkbox */}
+ <div className="flex items-center gap-3 py-2 px-3 bg-background rounded-xl border border-border mt-2">
+ <input type="checkbox" id="is_ingredient_only"
+ checked={formData.is_ingredient_only} onChange={e => setFormData({...formData, is_ingredient_only: e.target.checked})} className="w-4 h-4 rounded border-zinc-300 text-black focus:ring-black focus:ring-offset-0 cursor-pointer"
+ />
+ <label htmlFor="is_ingredient_only" className="text-xs font-semibold text-secondary cursor-pointer select-none">
+ 🧑‍🍳 Alleen als ingrediënt (niet zichtbaar voor klanten)
+ </label>
+ </div>
  </div>
 
  {/* Section 3: Custom Fields */}
@@ -853,7 +880,7 @@ function AdminProducts({ token }) {
  placeholder="Bijv. Inhoud, Extra heet, Smaak"
  value={opt.name}
  onChange={e => handleOptionChange(index, 'name', e.target.value)}
- className="w-[calc(100%-24px)] px-3 py-1.5 bg-white border border-border rounded-lg text-xs font-semibold focus:bg-surface transition-colors"
+ className="w-[calc(100%-24px)] px-3 py-1.5 bg-background border border-border rounded-lg text-xs font-semibold focus:bg-surface transition-colors"
  required
  />
  </div>
@@ -877,8 +904,8 @@ function AdminProducts({ token }) {
  onClick={() => handleOptionChange(index, 'type', t.id)}
  className={`py-1 rounded text-[9px] font-bold transition-all duration-200 ${
  isSelected
- ? 'bg-white text-black shadow-sm'
- : 'text-muted hover:text-zinc-700'
+ ? 'bg-background text-primary shadow-sm border border-border'
+ : 'text-muted hover:text-primary'
  }`}
  >
  {t.label}
@@ -900,7 +927,7 @@ function AdminProducts({ token }) {
  placeholder="Bijv. 33cl of 5.2%"
  value={opt.choices[0] || ''}
  onChange={e => handleStringValueChange(index, e.target.value)}
- className="w-full px-3 py-1.5 bg-white border border-border rounded-lg text-xs"
+ className="w-full px-3 py-1.5 bg-background border border-border rounded-lg text-xs focus:bg-surface"
  required
  />
  </div>
@@ -917,7 +944,7 @@ function AdminProducts({ token }) {
  placeholder="Bijv. Ja"
  value={opt.choices[0] || ''}
  onChange={e => handleToggleValueChange(index, 0, e.target.value)}
- className="w-full px-3 py-1.5 bg-white border border-border rounded-lg text-xs"
+ className="w-full px-3 py-1.5 bg-background border border-border rounded-lg text-xs focus:bg-surface"
  required
  />
  </div>
@@ -930,7 +957,7 @@ function AdminProducts({ token }) {
  placeholder="Bijv. Nee"
  value={opt.choices[1] || ''}
  onChange={e => handleToggleValueChange(index, 1, e.target.value)}
- className="w-full px-3 py-1.5 bg-white border border-border rounded-lg text-xs"
+ className="w-full px-3 py-1.5 bg-background border border-border rounded-lg text-xs focus:bg-surface"
  required
  />
  </div>
@@ -947,7 +974,7 @@ function AdminProducts({ token }) {
  placeholder="Bijv. Mayo, Ketchup, Curry"
  value={opt.choices.join(', ')}
  onChange={e => handleSelectChoicesChange(index, e.target.value)}
- className="w-full px-3 py-1.5 bg-white border border-border rounded-lg text-xs"
+ className="w-full px-3 py-1.5 bg-background border border-border rounded-lg text-xs focus:bg-surface"
  required
  />
  </div>

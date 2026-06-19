@@ -30,6 +30,7 @@ db.exec(`
     image_url TEXT,
     category TEXT NOT NULL,
     is_18_plus INTEGER NOT NULL DEFAULT 0,
+    is_ingredient_only INTEGER NOT NULL DEFAULT 0,
     stock_amount INTEGER,
     stock_unit TEXT DEFAULT 'stuks',
     status TEXT CHECK( status IN ('AVAILABLE', 'OUT_OF_STOCK', 'HIDDEN') ) NOT NULL DEFAULT 'AVAILABLE'
@@ -112,6 +113,13 @@ try {
 try {
   db.exec(`ALTER TABLE ProductOptions ADD COLUMN type TEXT NOT NULL DEFAULT 'select'`);
   console.log("Migration: Added type column to ProductOptions table.");
+} catch (e) {
+  // Column already exists, safe to ignore
+}
+
+try {
+  db.exec(`ALTER TABLE Products ADD COLUMN is_ingredient_only INTEGER NOT NULL DEFAULT 0`);
+  console.log("Migration: Added is_ingredient_only column to Products table.");
 } catch (e) {
   // Column already exists, safe to ignore
 }

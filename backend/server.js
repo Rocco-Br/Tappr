@@ -226,7 +226,7 @@ app.delete('/api/admin/users/:id', authenticate, requireAdmin, (req, res) => {
 // --- Routes: Products (Admin & Guest) ---
 app.get('/api/products', (req, res) => {
   try {
-    const products = db.prepare("SELECT * FROM Products WHERE status != 'HIDDEN'").all();
+    const products = db.prepare("SELECT * FROM Products WHERE status != 'HIDDEN' AND is_ingredient_only = 0").all();
     const enriched = products.map(p => {
       const options = db.prepare("SELECT * FROM ProductOptions WHERE product_id = ?").all(p.id);
       const parsedOptions = options.map(opt => ({
@@ -246,6 +246,7 @@ app.get('/api/products', (req, res) => {
         ...p,
         status: isOutOfStock ? 'OUT_OF_STOCK' : p.status,
         is_18_plus: !!p.is_18_plus,
+        is_ingredient_only: !!p.is_ingredient_only,
         options: parsedOptions,
         ingredients: ingredients
       };
@@ -278,6 +279,7 @@ app.get('/api/admin/products', authenticate, requireAdmin, (req, res) => {
         ...p,
         status: isOutOfStock ? 'OUT_OF_STOCK' : p.status,
         is_18_plus: !!p.is_18_plus,
+        is_ingredient_only: !!p.is_ingredient_only,
         options: parsedOptions,
         ingredients: ingredients
       };
@@ -296,11 +298,11 @@ app.post('/api/admin/products/upload', authenticate, requireAdmin, upload.single
 });
 
 app.post('/api/admin/products', authenticate, requireAdmin, (req, res) => {
-  const { name, description, image_url, category, is_18_plus, status, options } = req.body;
+  const { name, description, image_url, category, is_18_plus, is_ingredient_only, status, options } = req.body;
   try {
     const runTx = db.transaction(() => {
-      const info = db.prepare("INSERT INTO Products (name, description, image_url, category, is_18_plus, status) VALUES (?, ?, ?, ?, ?, ?)").run(
-        name, description || '', image_url || null, category, is_18_plus ? 1 : 0, status || 'AVAILABLE'
+      const info = db.prepare("INSERT INTO Products (name, description, image_url, category, is_18_plus, is_ingredient_only, status) VALUES (?, ?, ?, ?, ?, ?, ?)").run(
+        name, description || '', image_url || null, category, is_18_plus ? 1 : 0, is_ingredient_only ? 1 : 0, status || 'AVAILABLE'
       );
       const productId = info.lastInsertRowid;
       
@@ -331,12 +333,12 @@ app.post('/api/admin/products', authenticate, requireAdmin, (req, res) => {
 });
 
 app.put('/api/admin/products/:id', authenticate, requireAdmin, (req, res) => {
-  const { name, description, image_url, category, is_18_plus, status, options } = req.body;
+  const { name, description, image_url, category, is_18_plus, is_ingredient_only, status, options } = req.body;
   const productId = req.params.id;
   try {
     const runTx = db.transaction(() => {
-      db.prepare("UPDATE Products SET name=?, description=?, image_url=?, category=?, is_18_plus=?, status=? WHERE id=?").run(
-        name, description || '', image_url || null, category, is_18_plus ? 1 : 0, status, productId
+      db.prepare("UPDATE Products SET name=?, description=?, image_url=?, category=?, is_18_plus=?, is_ingredient_only=?, status=? WHERE id=?").run(
+        name, description || '', image_url || null, category, is_18_plus ? 1 : 0, is_ingredient_only ? 1 : 0, status, productId
       );
 
       // Remove existing options and insert new ones

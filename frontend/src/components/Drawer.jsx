@@ -47,7 +47,7 @@ function Drawer({ isOpen, onClose, title, description, children, footer }) {
         
         {/* Drawer Footer */}
         {footer && (
-          <div className="p-6 border-t border-border bg-zinc-50">
+          <div className="p-6 border-t border-border bg-background">
             {footer}
           </div>
         )}
